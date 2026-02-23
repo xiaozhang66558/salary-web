@@ -1,0 +1,130 @@
+<!DOCTYPE html>
+<html>
+<head>
+<meta charset="UTF-8">
+<title>Payslip</title>
+<script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
+
+<style>
+body{
+background:radial-gradient(circle at 20% 20%, #1f2a48, #0f172a 60%);
+color:white;
+font-family:Segoe UI;
+padding:40px;
+}
+.card{
+background:rgba(255,255,255,0.05);
+backdrop-filter:blur(25px);
+border-radius:20px;
+padding:40px;
+width:800px;
+margin:auto;
+box-shadow:0 20px 60px rgba(0,0,0,0.6);
+}
+h2{margin-bottom:20px;}
+.row{
+display:flex;
+justify-content:space-between;
+padding:10px 0;
+border-bottom:1px solid rgba(255,255,255,0.1);
+}
+.total{
+font-weight:bold;
+font-size:18px;
+color:#4ade80;
+}
+button{
+margin-top:20px;
+padding:12px 20px;
+border:none;
+border-radius:10px;
+background:linear-gradient(45deg,#3b82f6,#06b6d4);
+color:white;
+cursor:pointer;
+}
+</style>
+</head>
+
+<body>
+
+<div class="card">
+
+<h2 id="header"></h2>
+
+<div id="salaryData"></div>
+
+<button onclick="goBack()">Back</button>
+
+</div>
+
+<script>
+
+const supabaseUrl="https://apbaseiweunvfgeubvzp.supabase.co";
+const supabaseKey="sb_publishable_Dwob1zf-bHC2etDsbnJREw_sgaHuQDL";
+
+const { createClient } = supabase;
+const db=createClient(supabaseUrl,supabaseKey);
+
+async function loadSlip(){
+
+const emp_id=localStorage.getItem("emp_id");
+if(!emp_id){
+window.location.href="index.html";
+return;
+}
+
+const params=new URLSearchParams(window.location.search);
+const period=params.get("period");
+
+document.getElementById("header").innerText=`Payslip - ${period}`;
+
+const {data}=await db.from("salaries")
+.select("*")
+.eq("emp_id",emp_id)
+.eq("period",period)
+.single();
+
+const salary=data.data;
+
+let html="";
+let total=0;
+
+for(let key in salary){
+
+let value=Number(salary[key]);
+
+if(key.toLowerCase()==="total"){
+continue;
+}
+
+total+=value;
+
+html+=`
+<div class="row">
+<div>${key}</div>
+<div>${value.toLocaleString()}</div>
+</div>
+`;
+}
+
+html+=`
+<div class="row total">
+<div>Total</div>
+<div>${total.toLocaleString()}</div>
+</div>
+`;
+
+document.getElementById("salaryData").innerHTML=html;
+
+}
+
+function goBack(){
+window.location.href="dashboard.html";
+}
+
+loadSlip();
+
+</script>
+
+</body>
+</html>

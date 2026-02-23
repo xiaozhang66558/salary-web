@@ -1,0 +1,109 @@
+<!DOCTYPE html>
+<html>
+<head>
+<meta charset="UTF-8">
+<title>Dashboard</title>
+<script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
+
+<style>
+body{
+background:radial-gradient(circle at 20% 20%, #1f2a48, #0f172a 60%);
+color:white;
+font-family:Segoe UI;
+padding:40px;
+}
+.card{
+background:rgba(255,255,255,0.05);
+backdrop-filter:blur(25px);
+border-radius:20px;
+padding:40px;
+width:700px;
+margin:auto;
+box-shadow:0 20px 60px rgba(0,0,0,0.6);
+}
+h2{margin-bottom:20px;}
+select,button{
+width:100%;
+padding:14px;
+border-radius:10px;
+border:none;
+margin-top:15px;
+font-size:15px;
+}
+button{
+background:linear-gradient(45deg,#3b82f6,#06b6d4);
+color:white;
+cursor:pointer;
+}
+.logout{
+margin-top:20px;
+background:#333;
+}
+</style>
+</head>
+
+<body>
+
+<div class="card">
+
+<h2 id="title">Salary Dashboard</h2>
+
+<div id="userInfo"></div>
+
+<select id="periodSelect"></select>
+
+<button onclick="viewSlip()" id="viewBtn">View Slip</button>
+
+<button class="logout" onclick="logout()">Logout</button>
+
+</div>
+
+<script>
+
+const supabaseUrl="https://apbaseiweunvfgeubvzp.supabase.co";
+const supabaseKey="sb_publishable_Dwob1zf-bHC2etDsbnJREw_sgaHuQDL";
+
+const { createClient } = supabase;
+const db=createClient(supabaseUrl,supabaseKey);
+
+async function loadData(){
+
+const emp_id=localStorage.getItem("emp_id");
+
+if(!emp_id){
+window.location.href="index.html";
+return;
+}
+
+document.getElementById("userInfo").innerHTML="Employee ID: "+emp_id;
+
+const {data}=await db.from("salaries")
+.select("period")
+.eq("emp_id",emp_id)
+.order("period",{ascending:false});
+
+let select=document.getElementById("periodSelect");
+select.innerHTML="";
+
+data.forEach(row=>{
+select.innerHTML+=`<option value="${row.period}">${row.period}</option>`;
+});
+
+}
+
+function viewSlip(){
+const period=document.getElementById("periodSelect").value;
+window.location.href=`payslip.html?period=${period}`;
+}
+
+function logout(){
+localStorage.removeItem("emp_id");
+window.location.href="index.html";
+}
+
+loadData();
+
+</script>
+
+</body>
+</html>

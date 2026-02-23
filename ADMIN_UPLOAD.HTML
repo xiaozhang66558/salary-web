@@ -1,0 +1,113 @@
+<!DOCTYPE html>
+<html>
+<head>
+<meta charset="UTF-8">
+<title>Admin Upload Salary</title>
+
+<script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
+<script src="https://cdn.jsdelivr.net/npm/xlsx/dist/xlsx.full.min.js"></script>
+
+<style>
+body{
+font-family:Arial;
+background:#0f172a;
+color:white;
+text-align:center;
+padding:40px;
+}
+.container{
+max-width:600px;
+margin:auto;
+background:rgba(255,255,255,0.05);
+padding:30px;
+border-radius:15px;
+}
+button{
+padding:10px 20px;
+border:none;
+border-radius:8px;
+cursor:pointer;
+background:linear-gradient(45deg,#3b82f6,#06b6d4);
+color:white;
+margin-top:15px;
+}
+</style>
+</head>
+
+<body>
+
+<div class="container">
+<h2>Admin Upload Salary Excel</h2>
+
+<input type="file" id="fileInput" accept=".xlsx,.xls" />
+<br>
+<input type="text" id="periodInput" placeholder="Nhập kỳ lương (VD: 2024-01)" />
+<br>
+<button onclick="upload()">Upload</button>
+
+<p id="status"></p>
+</div>
+
+<script>
+
+const supabaseUrl = "https://apbaseiweunvfgeubvzp.supabase.co";
+
+/* ✅ ĐÃ SỬA KEY */
+const supabaseKey = "sb_publishable_Dwob1zf-bHC2etDsbnJREw_sgaHuQDL";
+
+const { createClient } = supabase;
+const db = createClient(supabaseUrl, supabaseKey);
+
+async function upload(){
+
+const file = document.getElementById("fileInput").files[0];
+const period = document.getElementById("periodInput").value.trim();
+const status = document.getElementById("status");
+
+if(!file || !period){
+status.innerText="Thiếu file hoặc kỳ lương";
+return;
+}
+
+const reader = new FileReader();
+
+reader.onload = async function(e){
+
+const data = new Uint8Array(e.target.result);
+const workbook = XLSX.read(data, {type:'array'});
+const sheet = workbook.Sheets[workbook.SheetNames[0]];
+const json = XLSX.utils.sheet_to_json(sheet);
+
+let uploadData = [];
+
+for(let row of json){
+
+uploadData.push({
+emp_id: row["ID"],
+period: period,
+data: row
+});
+
+}
+
+/* UPSERT GIỮ NGUYÊN LOGIC CŨ */
+const { error } = await db
+.from("salaries")
+.upsert(uploadData, { onConflict: "emp_id,period" });
+
+if(error){
+status.innerText="Upload lỗi: "+error.message;
+}else{
+status.innerText="Upload thành công!";
+}
+
+};
+
+reader.readAsArrayBuffer(file);
+
+}
+
+</script>
+
+</body>
+</html>
