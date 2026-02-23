@@ -51,8 +51,6 @@ margin-top:15px;
 <script>
 
 const supabaseUrl = "https://apbaseiweunvfgeubvzp.supabase.co";
-
-/* ✅ ĐÃ SỬA KEY */
 const supabaseKey = "sb_publishable_Dwob1zf-bHC2etDsbnJREw_sgaHuQDL";
 
 const { createClient } = supabase;
@@ -82,15 +80,34 @@ let uploadData = [];
 
 for(let row of json){
 
+const empId = String(row["ID"] || row["ID "] || "").trim();
+
+if(!empId) continue;
+
+/* 🔥 CHECK EMPLOYEE TỒN TẠI */
+const { data:existing } = await db
+.from("employees")
+.select("emp_id")
+.eq("emp_id", empId)
+.maybeSingle();
+
+/* 🔥 NẾU CHƯA CÓ → TỰ TẠO */
+if(!existing){
+await db.from("employees").insert([
+{ emp_id: empId, password_hash: "123456" }
+]);
+}
+
+/* GIỮ NGUYÊN LOGIC CŨ */
 uploadData.push({
-emp_id: row["ID"],
+emp_id: empId,
 period: period,
 data: row
 });
 
 }
 
-/* UPSERT GIỮ NGUYÊN LOGIC CŨ */
+/* UPSERT GIỮ NGUYÊN */
 const { error } = await db
 .from("salaries")
 .upsert(uploadData, { onConflict: "emp_id,period" });
