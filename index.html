@@ -1,0 +1,64 @@
+<!DOCTYPE html>
+<html>
+<head>
+<meta charset="UTF-8">
+<title>工资查询系统</title>
+<style>
+body{
+font-family: Arial;
+background:#f2f2f2;
+text-align:center;
+padding-top:100px;
+}
+.box{
+background:white;
+width:400px;
+margin:auto;
+padding:30px;
+border-radius:10px;
+box-shadow:0 0 10px rgba(0,0,0,0.1);
+}
+input{
+padding:10px;
+width:80%;
+}
+button{
+padding:10px 20px;
+margin-top:10px;
+}
+.result{
+margin-top:20px;
+text-align:left;
+}
+</style>
+</head>
+<body>
+<div class="box">
+<h2>工资查询系统</h2>
+<input type="text" id="userId" placeholder="输入员工ID">
+<br>
+<button onclick="search()">查询</button>
+<div class="result" id="result"></div>
+</div>
+
+<script>
+async function search(){
+const id=document.getElementById("userId").value.trim();
+const resDiv=document.getElementById("result");
+resDiv.innerHTML="加载中...";
+const response=await fetch("salary.json");
+const data=await response.json();
+const user=data.find(row=>row["ID"]===id);
+if(!user){
+resDiv.innerHTML="❌ 未找到员工";
+return;
+}
+let html="";
+for(let key in user){
+html+=`<p><b>${key}:</b> ${user[key]}</p>`;
+}
+resDiv.innerHTML=html;
+}
+</script>
+</body>
+</html>
