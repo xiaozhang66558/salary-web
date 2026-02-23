@@ -67,9 +67,13 @@ status.innerText="Thiếu file hoặc kỳ lương";
 return;
 }
 
+status.innerText="Đang xử lý...";
+
 const reader = new FileReader();
 
 reader.onload = async function(e){
+
+try{
 
 const data = new Uint8Array(e.target.result);
 const workbook = XLSX.read(data, {type:'array'});
@@ -81,24 +85,8 @@ let uploadData = [];
 for(let row of json){
 
 const empId = String(row["ID"] || row["ID "] || "").trim();
-
 if(!empId) continue;
 
-/* 🔥 CHECK EMPLOYEE TỒN TẠI */
-const { data:existing } = await db
-.from("employees")
-.select("emp_id")
-.eq("emp_id", empId)
-.maybeSingle();
-
-/* 🔥 NẾU CHƯA CÓ → TỰ TẠO */
-if(!existing){
-await db.from("employees").insert([
-{ emp_id: empId, password_hash: "123456" }
-]);
-}
-
-/* GIỮ NGUYÊN LOGIC CŨ */
 uploadData.push({
 emp_id: empId,
 period: period,
@@ -107,7 +95,11 @@ data: row
 
 }
 
-/* UPSERT GIỮ NGUYÊN */
+if(uploadData.length === 0){
+status.innerText="Không có dữ liệu hợp lệ trong file.";
+return;
+}
+
 const { error } = await db
 .from("salaries")
 .upsert(uploadData, { onConflict: "emp_id,period" });
@@ -116,6 +108,10 @@ if(error){
 status.innerText="Upload lỗi: "+error.message;
 }else{
 status.innerText="Upload thành công!";
+}
+
+}catch(err){
+status.innerText="Lỗi đọc file: " + err.message;
 }
 
 };
