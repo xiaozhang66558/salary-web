@@ -18,28 +18,12 @@ background:radial-gradient(circle at 20% 20%, #1f2a48, #0f172a 60%);
 overflow:hidden;
 }
 
-/* Background blur */
-body::before{
-content:"";
-position:absolute;
-width:600px;height:600px;
-background:linear-gradient(45deg,#3b82f6,#06b6d4);
-filter:blur(150px);
-opacity:0.3;top:-200px;left:-200px;
-}
-body::after{
-content:"";
-position:absolute;
-width:500px;height:500px;
-background:linear-gradient(45deg,#6366f1,#9333ea);
-filter:blur(150px);
-opacity:0.25;bottom:-200px;right:-200px;
-}
-
-/* CARD */
+/* ===== CARD ===== */
 .card{
-position:relative;z-index:10;
-width:420px;padding:45px;
+position:relative;
+z-index:10;
+width:420px;
+padding:45px;
 border-radius:20px;
 background:rgba(255,255,255,0.05);
 backdrop-filter:blur(25px);
@@ -53,21 +37,20 @@ h2{text-align:center;margin-bottom:20px;font-weight:600;}
 .input-group{margin-top:20px;}
 
 input{
-width:100%;padding:14px;
-border-radius:10px;border:none;
+width:100%;
+padding:14px;
+border-radius:10px;
+border:none;
 background:rgba(255,255,255,0.1);
-color:white;font-size:14px;
-outline:none;transition:0.3s;
+color:white;
+font-size:14px;
+outline:none;
 }
-input::placeholder{color:rgba(255,255,255,0.6);}
-input:focus{background:rgba(255,255,255,0.2);}
 
-/* BUTTONS */
 .buttons{
 display:flex;
-justify-content:space-between;
-margin-top:25px;
 gap:10px;
+margin-top:25px;
 }
 
 button{
@@ -77,47 +60,31 @@ border:none;
 border-radius:10px;
 font-size:14px;
 cursor:pointer;
-transition:0.3s;
 font-weight:600;
+color:white;
 }
 
 .login-btn{
 background:linear-gradient(45deg,#3b82f6,#06b6d4);
-color:white;
-}
-.login-btn:hover{
-transform:translateY(-2px);
-box-shadow:0 10px 25px rgba(59,130,246,0.5);
 }
 
 .register-btn{
 background:rgba(255,255,255,0.15);
-color:white;
-}
-.register-btn:hover{
-background:rgba(255,255,255,0.25);
 }
 
 .result{
-margin-top:25px;
-font-size:14px;
+margin-top:20px;
 min-height:20px;
 }
 
-.lang-select{text-align:right;margin-bottom:15px;}
-select{
-padding:6px;border-radius:6px;
-background:rgba(255,255,255,0.1);
-color:white;border:none;
-}
-
-/* ================= PIN MODAL ================= */
-
+/* ===== MODAL ===== */
 .modal-overlay{
 position:fixed;
-top:0;left:0;
-width:100%;height:100%;
-background:rgba(0,0,0,0.6);
+top:0;
+left:0;
+width:100%;
+height:100%;
+background:rgba(0,0,0,0.7);
 display:none;
 justify-content:center;
 align-items:center;
@@ -131,18 +98,13 @@ border-radius:20px;
 background:rgba(255,255,255,0.08);
 backdrop-filter:blur(30px);
 border:1px solid rgba(255,255,255,0.1);
-box-shadow:0 20px 60px rgba(0,0,0,0.6);
 color:white;
 text-align:center;
 }
 
-.modal h3{
-margin-bottom:15px;
-}
-
 .pin-input{
-margin-top:15px;
-padding:12px;
+margin-top:20px;
+padding:14px;
 width:100%;
 border-radius:10px;
 border:none;
@@ -154,9 +116,9 @@ letter-spacing:5px;
 }
 
 .modal-buttons{
-margin-top:20px;
 display:flex;
 gap:10px;
+margin-top:20px;
 }
 
 .modal-buttons button{
@@ -168,15 +130,6 @@ flex:1;
 <body>
 
 <div class="card">
-
-<div class="lang-select">
-<select onchange="setLanguage(this.value)">
-<option value="vi">🇻🇳 VN</option>
-<option value="zh">🇨🇳 中文</option>
-<option value="en">🇺🇸 EN</option>
-<option value="id">🇮🇩 ID</option>
-</select>
-</div>
 
 <h2 id="title"></h2>
 
@@ -193,10 +146,6 @@ flex:1;
 <button id="registerBtn" class="register-btn" onclick="register()"></button>
 </div>
 
-<div style="text-align:center;margin-top:15px;">
-<a href="#" onclick="forgotPassword()" style="color:#60a5fa;text-decoration:none;">🔑 <span id="forgotText">Quên mật khẩu?</span></a>
-</div>
-
 <div class="result" id="result"></div>
 
 </div>
@@ -204,11 +153,11 @@ flex:1;
 <!-- PIN MODAL -->
 <div class="modal-overlay" id="pinModal">
 <div class="modal">
-<h3 id="pinTitle">Tạo mã bảo mật 4 số</h3>
-<input type="password" maxlength="4" id="pinInput" class="pin-input" placeholder="••••">
+<h3 id="pinTitle"></h3>
+<input type="password" maxlength="4" id="pinInput" class="pin-input">
 <div class="modal-buttons">
-<button class="register-btn" onclick="closePinModal()">Huỷ</button>
-<button class="login-btn" onclick="confirmPin()">Xác nhận</button>
+<button class="register-btn" onclick="closePinModal()" id="cancelBtn"></button>
+<button class="login-btn" onclick="confirmPin()" id="confirmBtn"></button>
 </div>
 </div>
 </div>
@@ -219,119 +168,114 @@ const supabaseKey = "sb_publishable_Dwob1zf-bHC2etDsbnJREw_sgaHuQDL";
 const { createClient } = supabase;
 const supabaseClient = createClient(supabaseUrl, supabaseKey);
 
-let tempUserId = null;
+/* ===== 4 NGÔN NGỮ ===== */
+
+const langData={
+vi:{title:"Hệ thống lương",id:"Mã nhân viên",pass:"Mật khẩu",login:"Đăng nhập",register:"Thiết lập",pinCreate:"Tạo mã bảo mật 4 số",pinEnter:"Nhập mã PIN 4 số",cancel:"Huỷ",confirm:"Xác nhận",wrong:"Sai thông tin"},
+zh:{title:"薪资系统",id:"员工ID",pass:"密码",login:"登录",register:"首次设置",pinCreate:"创建4位安全码",pinEnter:"输入4位PIN",cancel:"取消",confirm:"确定",wrong:"信息错误"},
+en:{title:"Salary System",id:"Employee ID",pass:"Password",login:"Login",register:"First Setup",pinCreate:"Create 4-digit PIN",pinEnter:"Enter 4-digit PIN",cancel:"Cancel",confirm:"Confirm",wrong:"Wrong information"},
+id:{title:"Sistem Gaji",id:"ID Karyawan",pass:"Kata Sandi",login:"Masuk",register:"Pengaturan",pinCreate:"Buat PIN 4 digit",pinEnter:"Masukkan PIN 4 digit",cancel:"Batal",confirm:"Konfirmasi",wrong:"Data salah"}
+};
+
+let currentLang=localStorage.getItem("lang")||"vi";
+
+function applyLang(){
+document.getElementById("title").innerText=langData[currentLang].title;
+document.getElementById("userId").placeholder=langData[currentLang].id;
+document.getElementById("password").placeholder=langData[currentLang].pass;
+document.getElementById("loginBtn").innerText=langData[currentLang].login;
+document.getElementById("registerBtn").innerText=langData[currentLang].register;
+document.getElementById("cancelBtn").innerText=langData[currentLang].cancel;
+document.getElementById("confirmBtn").innerText=langData[currentLang].confirm;
+}
+
+applyLang();
 
 /* ===== LOGIN ===== */
-async function login(){
-const id=document.getElementById("userId").value.trim();
-const password=document.getElementById("password").value.trim();
-const res=document.getElementById("result");
 
-const { data } = await supabaseClient
-.from('employees')
+let tempUser=null;
+let mode="create";
+
+async function login(){
+const id=userId.value.trim();
+const pass=password.value.trim();
+const res=result;
+
+const {data}=await supabaseClient
+.from("employees")
 .select("*")
 .eq("emp_id",id)
-.eq("password_hash",password)
+.eq("password_hash",pass)
 .single();
 
 if(!data){
-res.innerHTML="❌ Sai mật khẩu";
+res.innerHTML="❌ "+langData[currentLang].wrong;
 return;
 }
+
+tempUser=id;
 
 if(!data.pin_code){
-tempUserId=id;
+mode="create";
+document.getElementById("pinTitle").innerText=langData[currentLang].pinCreate;
+}else{
+mode="login";
+document.getElementById("pinTitle").innerText=langData[currentLang].pinEnter;
+}
+
 openPinModal();
-return;
 }
 
-let pin=prompt("Nhập mã PIN 4 số:");
-if(pin!==data.pin_code){
-res.innerHTML="❌ Sai mã PIN";
-return;
-}
-
-localStorage.setItem("emp_id", id);
-window.location.href="dashboard.html";
-}
-
-/* ===== REGISTER ===== */
 async function register(){
-const id=document.getElementById("userId").value.trim();
-const password=document.getElementById("password").value.trim();
-const res=document.getElementById("result");
-
-const { data } = await supabaseClient
-.from('employees')
-.select("emp_id")
-.eq("emp_id",id)
-.single();
-
-if(data){
-res.innerHTML="❌ ID đã tồn tại";
-return;
-}
+const id=userId.value.trim();
+const pass=password.value.trim();
 
 await supabaseClient
-.from('employees')
-.insert([{ emp_id:id, password_hash:password }]);
+.from("employees")
+.insert([{emp_id:id,password_hash:pass}]);
 
-tempUserId=id;
+tempUser=id;
+mode="create";
+document.getElementById("pinTitle").innerText=langData[currentLang].pinCreate;
 openPinModal();
 }
 
-/* ===== PIN MODAL ===== */
+/* ===== PIN ===== */
 
 function openPinModal(){
-document.getElementById("pinModal").style.display="flex";
+pinModal.style.display="flex";
+pinInput.value="";
 }
 
 function closePinModal(){
-document.getElementById("pinModal").style.display="none";
+pinModal.style.display="none";
 }
 
 async function confirmPin(){
-const pin=document.getElementById("pinInput").value.trim();
-if(pin.length!==4){
-alert("PIN phải 4 số");
-return;
-}
+const pin=pinInput.value.trim();
+if(pin.length!==4) return;
 
+if(mode==="create"){
 await supabaseClient
-.from('employees')
-.update({ pin_code:pin })
-.eq("emp_id",tempUserId);
-
-closePinModal();
-localStorage.setItem("emp_id", tempUserId);
-window.location.href="dashboard.html";
-}
-
-/* ===== FORGOT PASSWORD ===== */
-
-async function forgotPassword(){
-const id=prompt("Nhập ID:");
-const pin=prompt("Nhập mã PIN 4 số:");
-
-const { data } = await supabaseClient
-.from('employees')
-.select("*")
-.eq("emp_id",id)
-.eq("pin_code",pin)
+.from("employees")
+.update({pin_code:pin})
+.eq("emp_id",tempUser);
+}else{
+const {data}=await supabaseClient
+.from("employees")
+.select("pin_code")
+.eq("emp_id",tempUser)
 .single();
 
-if(!data){
-alert("Sai thông tin");
+if(data.pin_code!==pin){
+result.innerHTML="❌ "+langData[currentLang].wrong;
 return;
 }
+}
 
-const newPass=prompt("Nhập mật khẩu mới:");
-await supabaseClient
-.from('employees')
-.update({ password_hash:newPass })
-.eq("emp_id",id);
-
-alert("Đổi mật khẩu thành công");
+closePinModal();
+localStorage.setItem("emp_id",tempUser);
+window.location.href="dashboard.html";
 }
 </script>
 
