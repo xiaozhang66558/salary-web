@@ -16,22 +16,6 @@ align-items:center;
 background:radial-gradient(circle at 20% 20%, #1f2a48, #0f172a 60%);
 overflow:hidden;
 }
-body::before{
-content:"";
-position:absolute;
-width:600px;height:600px;
-background:linear-gradient(45deg,#3b82f6,#06b6d4);
-filter:blur(150px);
-opacity:0.3;top:-200px;left:-200px;
-}
-body::after{
-content:"";
-position:absolute;
-width:500px;height:500px;
-background:linear-gradient(45deg,#6366f1,#9333ea);
-filter:blur(150px);
-opacity:0.25;bottom:-200px;right:-200px;
-}
 .card{
 position:relative;z-index:10;
 width:420px;padding:45px;
@@ -45,40 +29,23 @@ color:white;
 h2{text-align:center;margin-bottom:20px;font-weight:600;}
 .input-group{margin-top:20px;}
 input{
-width:100%;padding:14px;
-border-radius:10px;border:none;
+width:100%;padding:14px;border-radius:10px;border:none;
 background:rgba(255,255,255,0.1);
 color:white;font-size:14px;
-outline:none;transition:0.3s;
+outline:none;
 }
-input::placeholder{color:rgba(255,255,255,0.6);}
-input:focus{background:rgba(255,255,255,0.2);}
 .buttons{display:flex;justify-content:space-between;margin-top:25px;}
 button{
 width:48%;padding:14px;border:none;
 border-radius:10px;font-size:14px;
-cursor:pointer;transition:0.3s;
+cursor:pointer;
 }
-.login-btn{
-background:linear-gradient(45deg,#3b82f6,#06b6d4);
-color:white;
-}
-.login-btn:hover{
-transform:translateY(-2px);
-box-shadow:0 10px 25px rgba(59,130,246,0.5);
-}
-.register-btn{
-background:rgba(255,255,255,0.1);
-color:white;
-}
-.register-btn:hover{background:rgba(255,255,255,0.2);}
-.result{margin-top:25px;font-size:14px;max-height:250px;overflow:auto;}
+.login-btn{background:linear-gradient(45deg,#3b82f6,#06b6d4);color:white;}
+.register-btn{background:rgba(255,255,255,0.1);color:white;}
+.result{margin-top:20px;font-size:14px;}
+.extra{margin-top:15px;text-align:center;font-size:13px;cursor:pointer;color:#60a5fa;}
 .lang-select{text-align:right;margin-bottom:15px;}
-select{
-padding:6px;border-radius:6px;
-background:rgba(255,255,255,0.1);
-color:white;border:none;
-}
+select{padding:6px;border-radius:6px;background:rgba(255,255,255,0.1);color:white;border:none;}
 </style>
 </head>
 
@@ -110,95 +77,41 @@ color:white;border:none;
 <button id="registerBtn" class="register-btn" onclick="register()"></button>
 </div>
 
+<div class="extra" onclick="forgotPassword()">🔑 Quên mật khẩu?</div>
+
 <div class="result" id="result"></div>
 
 </div>
 
 <script>
-
 const supabaseUrl = "https://apbaseiweunvfgeubvzp.supabase.co";
 const supabaseKey = "sb_publishable_Dwob1zf-bHC2etDsbnJREw_sgaHuQDL";
-
 const { createClient } = supabase;
 const supabaseClient = createClient(supabaseUrl, supabaseKey);
 
-const translations = {
-vi:{
-title:"Hệ thống lương nội bộ",
-id:"Mã nhân viên",
-password:"Mật khẩu",
-login:"Đăng nhập",
-register:"Thiết lập lần đầu",
-fail:"Đăng nhập thất bại",
-registerSuccess:"Thiết lập mật khẩu thành công",
-registerFail:"ID đã tồn tại",
-empty:"Vui lòng nhập ID và mật khẩu",
-notFound:"ID không tồn tại trong hệ thống"
-},
-zh:{
-title:"企业内部薪资系统",
-id:"员工ID",
-password:"密码",
-login:"登录",
-register:"首次设置",
-fail:"登录失败",
-registerSuccess:"密码设置成功",
-registerFail:"ID已存在",
-empty:"请输入ID和密码",
-notFound:"系统中未找到ID"
-},
-en:{
-title:"Internal Salary System",
-id:"Employee ID",
-password:"Password",
-login:"Login",
-register:"First Setup",
-fail:"Login Failed",
-registerSuccess:"Password setup successful",
-registerFail:"ID already exists",
-empty:"Please enter ID and password",
-notFound:"ID not found in system"
-},
-id:{
-title:"Sistem Gaji Internal",
-id:"ID Karyawan",
-password:"Kata Sandi",
-login:"Masuk",
-register:"Pengaturan Awal",
-fail:"Login Gagal",
-registerSuccess:"Password berhasil dibuat",
-registerFail:"ID sudah ada",
-empty:"Masukkan ID dan password",
-notFound:"ID tidak ditemukan"
-}
-};
-
-let currentLang = localStorage.getItem("lang") || "vi";
-
-function setLanguage(lang){
-currentLang = lang;
-localStorage.setItem("lang", lang);
-document.getElementById("title").innerText = translations[lang].title;
-document.getElementById("userId").placeholder = translations[lang].id;
-document.getElementById("password").placeholder = translations[lang].password;
-document.getElementById("loginBtn").innerText = translations[lang].login;
-document.getElementById("registerBtn").innerText = translations[lang].register;
-}
+/* ================= LOGIN ================= */
 
 async function login(){
-const id=document.getElementById("userId").value.trim();
-const password=document.getElementById("password").value.trim();
-const res=document.getElementById("result");
+const id=userId.value.trim();
+const pass=password.value.trim();
+const res=result;
 
-const { data, error } = await supabaseClient
-.from('employees')
+const { data } = await supabaseClient
+.from("employees")
 .select("*")
 .eq("emp_id",id)
-.eq("password_hash",password)
+.eq("password_hash",pass)
 .single();
 
-if(error||!data){
-res.innerHTML="❌ "+translations[currentLang].fail;
+if(!data){
+res.innerHTML="❌ Sai ID hoặc mật khẩu";
+return;
+}
+
+/* yêu cầu nhập PIN */
+let pin = prompt("Nhập mã bảo mật 4 số:");
+if(!pin || pin !== data.pin_code){
+res.innerHTML="❌ Sai mã bảo mật";
 return;
 }
 
@@ -206,43 +119,81 @@ localStorage.setItem("emp_id", id);
 window.location.href="dashboard.html";
 }
 
-async function register(){
-const id=document.getElementById("userId").value.trim();
-const password=document.getElementById("password").value.trim();
-const res=document.getElementById("result");
+/* ================= REGISTER ================= */
 
-if(!id||!password){
-res.innerHTML="❌ "+translations[currentLang].empty;
+async function register(){
+const id=userId.value.trim();
+const pass=password.value.trim();
+const res=result;
+
+if(!id||!pass){
+res.innerHTML="❌ Vui lòng nhập đủ thông tin";
 return;
 }
 
-/* kiểm tra ID đã tồn tại chưa */
+/* kiểm tra tồn tại */
 const { data } = await supabaseClient
-.from('employees')
+.from("employees")
 .select("emp_id")
 .eq("emp_id",id)
 .single();
 
 if(data){
-res.innerHTML="❌ "+translations[currentLang].registerFail;
+res.innerHTML="❌ ID đã tồn tại";
 return;
 }
 
-/* tạo mới */
-const { error } = await supabaseClient
-.from('employees')
-.insert([{ emp_id:id, password_hash:password }]);
+/* tạo password */
+await supabaseClient
+.from("employees")
+.insert([{ emp_id:id, password_hash:pass }]);
 
-if(error){
-res.innerHTML="❌ "+translations[currentLang].registerFail;
+/* yêu cầu tạo PIN */
+let pin = prompt("Tạo mã bảo mật 4 số:");
+if(!pin || pin.length!==4){
+res.innerHTML="❌ Mã phải 4 số";
 return;
 }
 
-res.innerHTML="✅ "+translations[currentLang].registerSuccess;
+await supabaseClient
+.from("employees")
+.update({ pin_code: pin })
+.eq("emp_id", id);
+
+res.innerHTML="✅ Thiết lập thành công";
 }
 
-window.onload=()=>{setLanguage(currentLang);}
+/* ================= FORGOT PASSWORD ================= */
 
+async function forgotPassword(){
+let id = prompt("Nhập ID:");
+if(!id) return;
+
+let pin = prompt("Nhập mã bảo mật 4 số:");
+if(!pin) return;
+
+const { data } = await supabaseClient
+.from("employees")
+.select("*")
+.eq("emp_id",id)
+.eq("pin_code",pin)
+.single();
+
+if(!data){
+alert("Sai ID hoặc mã bảo mật");
+return;
+}
+
+let newPass = prompt("Nhập mật khẩu mới:");
+if(!newPass) return;
+
+await supabaseClient
+.from("employees")
+.update({ password_hash:newPass })
+.eq("emp_id", id);
+
+alert("Đổi mật khẩu thành công");
+}
 </script>
 
 </body>
