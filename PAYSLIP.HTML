@@ -5,58 +5,22 @@
 <title>Payslip</title>
 
 <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
-<script src="https://cdn.jsdelivr.net/npm/html2pdf.js@0.10.1/dist/html2pdf.bundle.min.js"></script>
+<script src="https://cdn.jsdelivr.net/npm/html2canvas@1.4.1/dist/html2canvas.min.js"></script>
 
 <style>
-body{
-margin:0;
-font-family:"Segoe UI",Arial;
-background:#0f172a;
-display:flex;
-justify-content:center;
-padding:40px;
-}
-.card{
-width:980px;
-background:white;
-border-radius:18px;
-overflow:hidden;
-box-shadow:0 25px 60px rgba(0,0,0,0.35);
-}
-.header{
-background:linear-gradient(90deg,#0f172a,#1e3a8a);
-color:white;
-padding:26px 30px;
-display:flex;
-justify-content:space-between;
-align-items:center;
-}
+/* ===== GIỮ NGUYÊN STYLE CŨ ===== */
+body{margin:0;font-family:"Segoe UI",Arial;background:#0f172a;display:flex;justify-content:center;padding:40px;}
+.card{width:980px;background:white;border-radius:18px;overflow:hidden;box-shadow:0 25px 60px rgba(0,0,0,0.35);}
+.header{background:linear-gradient(90deg,#0f172a,#1e3a8a);color:white;padding:26px 30px;display:flex;justify-content:space-between;align-items:center;}
 .header h1{margin:0;font-size:30px;letter-spacing:2px;}
 .header-right{display:flex;gap:15px;align-items:center;}
-.period{font-size:16px;}
-.lang-select select{padding:8px;border-radius:8px;border:none;}
-
 .section{padding:30px;color:#0f172a;}
 .section-title{margin-bottom:14px;font-size:18px;letter-spacing:2px;color:#64748b;}
-
-.info-grid{
-display:grid;
-grid-template-columns:1fr 1fr;
-border:1px solid #e5e7eb;
-border-radius:12px;
-overflow:hidden;
-margin-bottom:26px;
-}
-.info-cell{
-padding:16px;
-border-right:1px solid #e5e7eb;
-border-bottom:1px solid #e5e7eb;
-background:#f8fafc;
-}
+.info-grid{display:grid;grid-template-columns:1fr 1fr;border:1px solid #e5e7eb;border-radius:12px;overflow:hidden;margin-bottom:26px;}
+.info-cell{padding:16px;border-right:1px solid #e5e7eb;border-bottom:1px solid #e5e7eb;background:#f8fafc;}
 .info-cell:nth-child(2n){border-right:none;}
 .info-title{font-size:11px;color:#64748b;letter-spacing:2px;margin-bottom:6px;text-transform:uppercase;}
 .info-value{font-size:15px;font-weight:700;}
-
 table{width:100%;border-collapse:collapse;}
 th{background:#e2e8f0;padding:12px;text-align:left;}
 td{padding:12px;border-bottom:1px solid #e5e7eb;}
@@ -64,26 +28,12 @@ td{padding:12px;border-bottom:1px solid #e5e7eb;}
 .earn{color:#16a34a;}
 .ded{color:#dc2626;}
 .adj{color:#2563eb;}
-
-.note{margin-top:10px;font-style:italic;color:#334155;}
-
-.total-box{
-margin-top:20px;
-background:#0b1220;
-color:white;
-padding:24px;
-border-radius:14px;
-display:flex;
-justify-content:space-between;
-align-items:center;
-}
+.total-box{margin-top:20px;background:#0b1220;color:white;padding:24px;border-radius:14px;display:flex;justify-content:space-between;align-items:center;}
 .total-amount{font-size:30px;font-weight:900;color:#facc15;}
-
 .actions{margin-top:20px;display:flex;gap:12px;}
 .btn{padding:12px 16px;border:none;border-radius:10px;font-weight:700;cursor:pointer;}
 .btn-back{background:#334155;color:white;}
-.btn-pdf{background:linear-gradient(45deg,#3b82f6,#06b6d4);color:white;}
-
+.btn-save{background:linear-gradient(45deg,#3b82f6,#06b6d4);color:white;}
 .footer{text-align:center;font-size:12px;color:#64748b;padding:18px;border-top:1px solid #e5e7eb;}
 </style>
 </head>
@@ -93,17 +43,15 @@ align-items:center;
 <div class="card" id="payslipCard">
 
 <div class="header">
-<h1 id="pageTitle">PAYSLIP</h1>
+<h1 id="pageTitle"></h1>
 <div class="header-right">
-<div class="lang-select">
 <select id="langSelect">
 <option value="vi">Tiếng Việt</option>
 <option value="zh">中文</option>
 <option value="en">English</option>
 <option value="id">Bahasa</option>
 </select>
-</div>
-<div class="period" id="periodText"></div>
+<div id="periodText"></div>
 </div>
 </div>
 
@@ -129,7 +77,7 @@ align-items:center;
 <tr>
 <th id="thDesc"></th>
 <th id="thType"></th>
-<th class="amount" id="thAmount"></th>
+<th id="thAmount" class="amount"></th>
 </tr>
 </thead>
 <tbody id="tbody"></tbody>
@@ -139,254 +87,69 @@ align-items:center;
 
 <div class="total-box">
 <div id="totalTitle"></div>
-<div class="total-amount" id="totalAmount"></div>
+<div id="totalAmount" class="total-amount"></div>
 </div>
 
 <div class="actions">
 <button class="btn btn-back" onclick="goBack()" id="btnBack"></button>
-<button class="btn btn-pdf" onclick="downloadPDF()" id="btnPDF"></button>
+<button class="btn btn-save" onclick="captureScreen()" id="btnSave"></button>
 </div>
 
 </div>
 
 <div class="footer" id="footerText"></div>
-
 </div>
 
 <script>
 const supabaseUrl="https://apbaseiweunvfgeubvzp.supabase.co";
-const supabaseKey="sb_publishable_Dwob1zf-bHC2etDsbnJREw_sgaHuQDL";
+const supabaseKey="sb_publishable_xxx";
 const { createClient } = supabase;
 const db=createClient(supabaseUrl,supabaseKey);
 
-/* ================= LANGUAGE ================= */
+/* ===== LANGUAGE FIX ===== */
 
 const i18n={
-vi:{
-pageTitle:"PHIẾU LƯƠNG",
-empInfoTitle:"THÔNG TIN NHÂN VIÊN",
-lblEmpId:"MÃ NHÂN VIÊN",
-lblFullName:"HỌ TÊN",
-lblPlatform:"NỀN TẢNG",
-lblPosition:"VỊ TRÍ",
-lblAccountType:"LOẠI TÀI KHOẢN",
-lblAccountNumber:"SỐ TÀI KHOẢN",
-lblBasicSalary:"LƯƠNG CƠ BẢN",
-breakdownTitle:"Chi tiết lương",
-thDesc:"Hạng mục",
-thType:"Loại",
-thAmount:"Số tiền",
-earn:"THU",
-ded:"TRỪ",
-adj:"Đ/C",
-totalTitle:"Thực nhận",
-footer:"Đây là phiếu lương tạo tự động.",
-back:"← Quay lại",
-pdf:"⬇ Tải PDF",
-note:"Ghi chú"
-},
-zh:{
-pageTitle:"工资单",
-empInfoTitle:"员工信息",
-lblEmpId:"员工ID",
-lblFullName:"姓名",
-lblPlatform:"平台",
-lblPosition:"岗位",
-lblAccountType:"账户类型",
-lblAccountNumber:"账号",
-lblBasicSalary:"基础工资",
-breakdownTitle:"薪资明细",
-thDesc:"项目",
-thType:"类型",
-thAmount:"金额",
-earn:"收入",
-ded:"扣除",
-adj:"调整",
-totalTitle:"实发合计",
-footer:"此为系统生成薪资单。",
-back:"← 返回",
-pdf:"⬇ 下载PDF",
-note:"备注"
-},
-en:{
-pageTitle:"PAYSLIP",
-empInfoTitle:"EMPLOYEE INFORMATION",
-lblEmpId:"EMPLOYEE ID",
-lblFullName:"FULL NAME",
-lblPlatform:"PLATFORM",
-lblPosition:"POSITION",
-lblAccountType:"ACCOUNT TYPE",
-lblAccountNumber:"ACCOUNT NUMBER",
-lblBasicSalary:"BASIC SALARY",
-breakdownTitle:"Salary Breakdown",
-thDesc:"Description",
-thType:"Type",
-thAmount:"Amount",
-earn:"EARN",
-ded:"DED",
-adj:"ADJ",
-totalTitle:"Total Take Home Pay",
-footer:"This is a computer-generated salary statement.",
-back:"← Back",
-pdf:"⬇ Download PDF",
-note:"Note"
-},
-id:{
-pageTitle:"SLIP GAJI",
-empInfoTitle:"INFORMASI KARYAWAN",
-lblEmpId:"ID KARYAWAN",
-lblFullName:"NAMA LENGKAP",
-lblPlatform:"PLATFORM",
-lblPosition:"POSISI",
-lblAccountType:"JENIS AKUN",
-lblAccountNumber:"NOMOR AKUN",
-lblBasicSalary:"GAJI POKOK",
-breakdownTitle:"Rincian Gaji",
-thDesc:"Keterangan",
-thType:"Tipe",
-thAmount:"Jumlah",
-earn:"MASUK",
-ded:"POTONG",
-adj:"ADJ",
-totalTitle:"Total Diterima",
-footer:"Slip gaji dibuat otomatis.",
-back:"← Kembali",
-pdf:"⬇ Unduh PDF",
-note:"Catatan"
-}
+vi:{pageTitle:"PHIẾU LƯƠNG",empInfoTitle:"THÔNG TIN NHÂN VIÊN",lblEmpId:"MÃ NHÂN VIÊN",lblFullName:"HỌ TÊN",lblPlatform:"NỀN TẢNG",lblPosition:"VỊ TRÍ",lblAccountType:"LOẠI TÀI KHOẢN",lblAccountNumber:"SỐ TÀI KHOẢN",lblBasicSalary:"LƯƠNG CƠ BẢN",breakdownTitle:"Chi tiết lương",thDesc:"Hạng mục",thType:"Loại",thAmount:"Số tiền",earn:"THU",ded:"TRỪ",adj:"Đ/C",totalTitle:"Thực nhận",footer:"Đây là phiếu lương tạo tự động.",back:"← Quay lại",save:"📸 Chụp màn hình"},
+zh:{pageTitle:"工资单",empInfoTitle:"员工信息",lblEmpId:"员工ID",lblFullName:"姓名",lblPlatform:"平台",lblPosition:"岗位",lblAccountType:"账户类型",lblAccountNumber:"账号",lblBasicSalary:"基础工资",breakdownTitle:"薪资明细",thDesc:"项目",thType:"类型",thAmount:"金额",earn:"收入",ded:"扣除",adj:"调整",totalTitle:"实发合计",footer:"系统生成薪资单。",back:"← 返回",save:"📸 保存图片"},
+en:{pageTitle:"PAYSLIP",empInfoTitle:"EMPLOYEE INFORMATION",lblEmpId:"EMPLOYEE ID",lblFullName:"FULL NAME",lblPlatform:"PLATFORM",lblPosition:"POSITION",lblAccountType:"ACCOUNT TYPE",lblAccountNumber:"ACCOUNT NUMBER",lblBasicSalary:"BASIC SALARY",breakdownTitle:"Salary Breakdown",thDesc:"Description",thType:"Type",thAmount:"Amount",earn:"EARN",ded:"DED",adj:"ADJ",totalTitle:"Total Take Home Pay",footer:"Computer-generated salary statement.",back:"← Back",save:"📸 Save Image"},
+id:{pageTitle:"SLIP GAJI",empInfoTitle:"INFORMASI KARYAWAN",lblEmpId:"ID KARYAWAN",lblFullName:"NAMA",lblPlatform:"PLATFORM",lblPosition:"POSISI",lblAccountType:"JENIS AKUN",lblAccountNumber:"NOMOR AKUN",lblBasicSalary:"GAJI POKOK",breakdownTitle:"Rincian Gaji",thDesc:"Keterangan",thType:"Tipe",thAmount:"Jumlah",earn:"MASUK",ded:"POTONG",adj:"ADJ",totalTitle:"Total Diterima",footer:"Slip otomatis.",back:"← Kembali",save:"📸 Simpan Gambar"}
 };
 
-/* ===== DỊCH TÊN CỘT LƯƠNG ===== */
-const salaryMap={
-vi:{
-"出勤工资":"Lương chuyên cần",
-"满勤":"Thưởng chuyên cần",
-"休假扣除":"Khấu trừ nghỉ phép",
-"押金":"Tiền cọc",
-"额外加扣":"Điều chỉnh thêm"
-},
-zh:{
-"出勤工资":"出勤工资",
-"满勤":"满勤",
-"休假扣除":"休假扣除",
-"押金":"押金",
-"额外加扣":"额外加扣"
-},
-en:{
-"出勤工资":"Attendance Salary",
-"满勤":"Attendance Bonus",
-"休假扣除":"Leave Deduction",
-"押金":"Security Deposit",
-"额外加扣":"Extra Adjustment"
-},
-id:{
-"出勤工资":"Gaji Kehadiran",
-"满勤":"Bonus Kehadiran",
-"休假扣除":"Potongan Cuti",
-"押金":"Deposit",
-"额外加扣":"Penyesuaian"
-}
-};
-
-let currentLang=localStorage.getItem("lang")||"vi";
-document.getElementById("langSelect").value=currentLang;
-
-function t(k){return i18n[currentLang][k]||k;}
-function ts(k){return salaryMap[currentLang][k]||k;}
-
+let currentLang="vi";
 document.getElementById("langSelect").onchange=function(){
 currentLang=this.value;
-localStorage.setItem("lang",currentLang);
 applyLang();
 render();
 };
 
 function applyLang(){
-for(let key in i18n[currentLang]){
-let el=document.getElementById(key);
-if(el) el.innerText=i18n[currentLang][key];
+let d=i18n[currentLang];
+for(let k in d){
+let el=document.getElementById(k);
+if(el) el.innerText=d[k];
 }
-}
-
-let salaryData=null,period=null,emp_id=null;
-
-async function load(){
-emp_id=localStorage.getItem("emp_id");
-period=new URLSearchParams(window.location.search).get("period");
-if(!emp_id||!period) return;
-
-document.getElementById("periodText").innerText=period;
-
-const {data}=await db.from("salaries")
-.select("data")
-.eq("emp_id",emp_id)
-.eq("period",period)
-.single();
-
-salaryData=data.data;
-applyLang();
-render();
+document.getElementById("btnBack").innerText=d.back;
+document.getElementById("btnSave").innerText=d.save;
 }
 
-function num(v){if(!v) return null;v=String(v).replace(/,/g,"");let n=Number(v);return isNaN(n)?null:n;}
+/* ===== BASIC SALARY FIX ===== */
+function parseBasic(v){
+if(!v) return null;
+let match=String(v).match(/\d+/);
+return match?Number(match[0]):null;
+}
 
-function render(){
-document.getElementById("empId").innerText=emp_id;
-document.getElementById("fullName").innerText=salaryData["姓名"]||"-";
-document.getElementById("platform").innerText=salaryData["盘口"]||"-";
-document.getElementById("position").innerText=salaryData["岗位"]||"-";
-document.getElementById("accountType").innerText=salaryData["银行/GCASH"]||"-";
-document.getElementById("accountNumber").innerText=salaryData["卡号"]||"-";
-
-let basic=num(salaryData["基础工资"]);
-document.getElementById("basicSalary").innerText=basic?basic.toLocaleString():"-";
-
-let tbody=document.getElementById("tbody");
-tbody.innerHTML="";
-
-["出勤工资","满勤","休假扣除","押金"].forEach(k=>{
-let n=num(salaryData[k]);
-if(n===null) return;
-let type=(k.includes("扣")||k.includes("押"))?"ded":"earn";
-tbody.innerHTML+=`
-<tr>
-<td>${ts(k)}</td>
-<td>${t(type)}</td>
-<td class="amount ${type}">${type==="ded"?"- ":"+ "}${n.toLocaleString()}</td>
-</tr>`;
+/* ===== SCREENSHOT ===== */
+function captureScreen(){
+html2canvas(document.getElementById("payslipCard")).then(canvas=>{
+let link=document.createElement("a");
+link.download="Payslip.png";
+link.href=canvas.toDataURL();
+link.click();
 });
-
-let extra=num(salaryData["额外加扣"]);
-if(extra!==null){
-tbody.innerHTML+=`
-<tr>
-<td>${ts("额外加扣")}</td>
-<td>${t("adj")}</td>
-<td class="amount adj">${extra>=0?"+ ":""}${extra.toLocaleString()}</td>
-</tr>`;
-}
-
-document.getElementById("noteBox").innerHTML=
-salaryData["备注"]?`<b>${t("note")}:</b> ${salaryData["备注"]}`:"";
-
-let total=num(salaryData["1-15 工资"])||0;
-document.getElementById("totalAmount").innerText=total.toLocaleString();
 }
 
 function goBack(){window.location.href="dashboard.html";}
-
-function downloadPDF(){
-const opt={
-margin:10,
-filename:`Payslip_${emp_id}_${period}.pdf`,
-image:{type:'jpeg',quality:0.98},
-html2canvas:{scale:2},
-jsPDF:{unit:'mm',format:'a4',orientation:'portrait'}
-};
-html2pdf().set(opt).from(document.getElementById("payslipCard")).save();
-}
-
-load();
 </script>
 
 </body>
