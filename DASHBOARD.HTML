@@ -39,12 +39,28 @@ cursor:pointer;
 margin-top:20px;
 background:#333;
 }
+.lang-select{
+margin-bottom:20px;
+}
+.lang-select select{
+background:white;
+color:black;
+}
 </style>
 </head>
 
 <body>
 
 <div class="card">
+
+<div class="lang-select">
+<select id="langSelect">
+<option value="vi">Tiếng Việt</option>
+<option value="zh">中文</option>
+<option value="en">English</option>
+<option value="id">Bahasa</option>
+</select>
+</div>
 
 <h2 id="title">Salary Dashboard</h2>
 
@@ -54,7 +70,7 @@ background:#333;
 
 <button onclick="viewSlip()" id="viewBtn">View Slip</button>
 
-<button class="logout" onclick="logout()">Logout</button>
+<button class="logout" onclick="logout()" id="logoutBtn">Logout</button>
 
 </div>
 
@@ -66,6 +82,62 @@ const supabaseKey="sb_publishable_Dwob1zf-bHC2etDsbnJREw_sgaHuQDL";
 const { createClient } = supabase;
 const db=createClient(supabaseUrl,supabaseKey);
 
+/* ================= LANGUAGE ================= */
+
+const i18n={
+vi:{
+title:"Bảng Lương",
+employee:"Mã nhân viên",
+view:"Xem phiếu lương",
+logout:"Đăng xuất"
+},
+zh:{
+title:"工资面板",
+employee:"员工编号",
+view:"查看工资单",
+logout:"退出登录"
+},
+en:{
+title:"Salary Dashboard",
+employee:"Employee ID",
+view:"View Slip",
+logout:"Logout"
+},
+id:{
+title:"Dashboard Gaji",
+employee:"ID Karyawan",
+view:"Lihat Slip",
+logout:"Keluar"
+}
+};
+
+let currentLang=localStorage.getItem("lang")||"vi";
+document.getElementById("langSelect").value=currentLang;
+
+function t(key){
+return i18n[currentLang][key]||key;
+}
+
+function applyLang(){
+document.getElementById("title").innerText=t("title");
+document.getElementById("viewBtn").innerText=t("view");
+document.getElementById("logoutBtn").innerText=t("logout");
+
+const emp_id=localStorage.getItem("emp_id");
+if(emp_id){
+document.getElementById("userInfo").innerHTML=
+`${t("employee")}: ${emp_id}`;
+}
+}
+
+document.getElementById("langSelect").onchange=function(){
+currentLang=this.value;
+localStorage.setItem("lang",currentLang);
+applyLang();
+};
+
+/* ================= DATA ================= */
+
 async function loadData(){
 
 const emp_id=localStorage.getItem("emp_id");
@@ -74,8 +146,6 @@ if(!emp_id){
 window.location.href="index.html";
 return;
 }
-
-document.getElementById("userInfo").innerHTML="Employee ID: "+emp_id;
 
 const {data}=await db.from("salaries")
 .select("period")
@@ -89,6 +159,7 @@ data.forEach(row=>{
 select.innerHTML+=`<option value="${row.period}">${row.period}</option>`;
 });
 
+applyLang();
 }
 
 function viewSlip(){
