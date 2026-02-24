@@ -326,8 +326,7 @@ const i18n = {
     back: "← Quay lại",
     pdf: "⬇ Tải PDF",
     notFound: "Không tìm thấy dữ liệu lương.",
-    note: "Ghi chú",
-    periodPrefix: ""
+    note: "Ghi chú"
   },
   zh: {
     pageTitle: "工资单",
@@ -350,8 +349,7 @@ const i18n = {
     back: "← 返回",
     pdf: "⬇ 下载PDF",
     notFound: "未找到薪资数据。",
-    note: "备注",
-    periodPrefix: ""
+    note: "备注"
   },
   en: {
     pageTitle: "PAYSLIP",
@@ -374,8 +372,7 @@ const i18n = {
     back: "← Back",
     pdf: "⬇ Download PDF",
     notFound: "No salary data found.",
-    note: "Note",
-    periodPrefix: ""
+    note: "Note"
   },
   id: {
     pageTitle: "SLIP GAJI",
@@ -398,8 +395,7 @@ const i18n = {
     back: "← Kembali",
     pdf: "⬇ Unduh PDF",
     notFound: "Data gaji tidak ditemukan.",
-    note: "Catatan",
-    periodPrefix: ""
+    note: "Catatan"
   }
 };
 
@@ -410,28 +406,28 @@ const colMap = {
     "卡号":"Số tài khoản", "银行姓名":"Tên ngân hàng", "银行/GCASH":"Ngân hàng/GCASH",
     "基础工资":"Lương cơ bản", "出勤工资":"Lương chuyên cần", "休假扣除":"Khấu trừ nghỉ phép",
     "押金":"Tiền cọc", "满勤":"Thưởng chuyên cần", "额外加扣":"Điều chỉnh thêm", "备注":"Ghi chú",
-    "1-15 工资":"Lương 1-15", "16-30 工资":"Lương 16-30", "总计":"Thực nhận", "合计":"Thực nhận"
+    "1-15 工资":"Lương 1-15"
   },
   zh: {
     "盘口":"盘口", "岗位":"岗位", "ID":"ID", "姓名":"姓名",
     "卡号":"卡号", "银行姓名":"银行姓名", "银行/GCASH":"银行/GCASH",
     "基础工资":"基础工资", "出勤工资":"出勤工资", "休假扣除":"休假扣除",
     "押金":"押金", "满勤":"满勤", "额外加扣":"额外加扣", "备注":"备注",
-    "1-15 工资":"1-15 工资", "16-30 工资":"16-30 工资", "总计":"总计", "合计":"合计"
+    "1-15 工资":"1-15 工资"
   },
   en: {
     "盘口":"Platform", "岗位":"Position", "ID":"Employee ID", "姓名":"Full Name",
     "卡号":"Account Number", "银行姓名":"Bank Name", "银行/GCASH":"Bank/GCASH",
     "基础工资":"Basic Salary", "出勤工资":"Attendance Salary", "休假扣除":"Leave Deduction",
     "押金":"Security Deposit", "满勤":"Attendance Bonus", "额外加扣":"Extra / Other", "备注":"Note",
-    "1-15 工资":"Salary 1-15", "16-30 工资":"Salary 16-30", "总计":"Total", "合计":"Total"
+    "1-15 工资":"Salary 1-15"
   },
   id: {
     "盘口":"Platform", "岗位":"Posisi", "ID":"ID Karyawan", "姓名":"Nama Lengkap",
     "卡号":"Nomor Akun", "银行姓名":"Nama Bank", "银行/GCASH":"Bank/GCASH",
     "基础工资":"Gaji Pokok", "出勤工资":"Gaji Kehadiran", "休假扣除":"Potongan Cuti",
     "押金":"Deposit", "满勤":"Bonus Kehadiran", "额外加扣":"Tambahan / Lainnya", "备注":"Catatan",
-    "1-15 工资":"Gaji 1-15", "16-30 工资":"Gaji 16-30", "总计":"Total", "合计":"Total"
+    "1-15 工资":"Gaji 1-15"
   }
 };
 
@@ -442,7 +438,6 @@ function getLang(){
 function setLang(lang){
   localStorage.setItem("lang", lang);
   applyLang(lang);
-  // rerender labels already drawn
   renderLastData();
 }
 function t(key){
@@ -457,25 +452,14 @@ function sanitizeNumber(v){
   if(v === null || v === undefined) return null;
   let s = String(v).trim();
   if(!s) return null;
-
-  // xử lý NaN / null text
   if(s.toLowerCase() === "nan" || s.toLowerCase() === "null" || s === "-") return null;
-
-  // bỏ dấu phẩy + khoảng trắng
   s = s.replace(/,/g, "").replace(/\s+/g, "");
-
-  // nếu có dấu +/-
-  // chỉ lấy số hợp lệ
   const n = Number(s);
   if(Number.isNaN(n)) return null;
   return n;
 }
 function formatMoney(n){
-  try{
-    return Number(n).toLocaleString();
-  }catch(e){
-    return String(n);
-  }
+  try{ return Number(n).toLocaleString(); }catch(e){ return String(n); }
 }
 function getQueryParam(name){
   return new URLSearchParams(window.location.search).get(name);
@@ -517,7 +501,6 @@ function applyLang(lang){
   document.getElementById("btnBack").innerText = i18n[lang].back;
   document.getElementById("btnPDF").innerText = i18n[lang].pdf;
 
-  // set select UI
   document.getElementById("langSelect").value = lang;
 }
 
@@ -544,7 +527,6 @@ async function loadPayslip(){
 
   document.getElementById("periodText").innerText = period;
 
-  // fetch from supabase salaries
   const { data, error } = await db
     .from("salaries")
     .select("data, period")
@@ -571,8 +553,7 @@ function renderLastData(){
 }
 
 function render(salaryData, period, empId){
-  // ===== Employee info (lấy từ JSONB theo key excel) =====
-  // theo file của bạn: 盘口, 岗位, 姓名, 卡号, 银行/GCASH, 银行姓名
+  // ===== Employee info =====
   const fullName = salaryData["姓名"] || salaryData["name"] || "-";
   const platform = salaryData["盘口"] || "-";
   const position = salaryData["岗位"] || "-";
@@ -587,17 +568,19 @@ function render(salaryData, period, empId){
   document.getElementById("accountNumber").innerText = accountNumber;
 
   // ===== Salary Breakdown =====
-  // YÊU CẦU: "Chi tiết lương không cần có số tài khoản" => không đưa "卡号" vào bảng
-  // Hiển thị các cột lương bạn muốn thấy trong WPS:
+  // ✅ yêu cầu mới:
+  // - "1-15 工资" là tổng => không đưa vào chi tiết
+  // - "额外加扣" luôn ở hàng cuối
+  //
+  // Vì vậy breakdownKeys KHÔNG có "1-15 工资"
+  // và ta sẽ render tất cả keys trừ "额外加扣" trước, rồi render "额外加扣" cuối.
   const breakdownKeys = [
     "基础工资",
     "出勤工资",
-    "1-15 工资",
-    "16-30 工资",
     "满勤",
-    "额外加扣",
     "休假扣除",
-    "押金"
+    "押金",
+    "额外加扣" // vẫn có nhưng sẽ ép xuống cuối
   ];
 
   const tbody = document.querySelector("#salaryTable tbody");
@@ -606,21 +589,22 @@ function render(salaryData, period, empId){
   let totalCalc = 0;
   let hasAnyRow = false;
 
-  for(const key of breakdownKeys){
-    if(!(key in salaryData)) continue;
-
-    const raw = salaryData[key];
-    const n = sanitizeNumber(raw);
-
-    // nếu rỗng thì bỏ (tránh NaN)
-    if(n === null) continue;
-
-    // type logic
+  function calcType(key){
     let type = "earn";
     if(key.includes("扣") || key.includes("押")) type = "ded";
     if(key.includes("额外") || key.includes("调整")) type = "adj";
+    return type;
+  }
 
-    // cộng tổng
+  function addRow(key){
+    if(!(key in salaryData)) return;
+
+    const raw = salaryData[key];
+    const n = sanitizeNumber(raw);
+    if(n === null) return;
+
+    const type = calcType(key);
+
     if(type === "earn") totalCalc += n;
     if(type === "ded") totalCalc -= n;
     if(type === "adj") totalCalc += n;
@@ -637,6 +621,14 @@ function render(salaryData, period, empId){
     hasAnyRow = true;
   }
 
+  // render tất cả trừ 额外加扣 trước
+  for(const key of breakdownKeys){
+    if(key === "额外加扣") continue;
+    addRow(key);
+  }
+  // render 额外加扣 cuối
+  addRow("额外加扣");
+
   // Note (备注)
   const noteRaw = salaryData["备注"];
   const noteBox = document.getElementById("noteBox");
@@ -648,27 +640,33 @@ function render(salaryData, period, empId){
     noteBox.innerHTML = "";
   }
 
-  // Total: ưu tiên đọc nếu file có cột tổng (nếu bạn có “总计/合计/实发…”)
-  const totalCandidates = ["总计","合计","实发","实领","Total","total","THỰC NHẬN","Thực nhận"];
+  // ===== Total =====
+  // ✅ "1-15 工资" là tổng => ưu tiên lấy total từ cột này
+  // nếu không có thì fallback sang các cột total khác, nếu vẫn không có thì dùng totalCalc
   let totalFromData = null;
-  for(const k of totalCandidates){
-    if(k in salaryData){
-      const n = sanitizeNumber(salaryData[k]);
-      if(n !== null){
-        totalFromData = n;
-        break;
+
+  if("1-15 工资" in salaryData){
+    const n = sanitizeNumber(salaryData["1-15 工资"]);
+    if(n !== null) totalFromData = n;
+  }
+
+  if(totalFromData === null){
+    const totalCandidates = ["总计","合计","实发","实领","Total","total","THỰC NHẬN","Thực nhận"];
+    for(const k of totalCandidates){
+      if(k in salaryData){
+        const n = sanitizeNumber(salaryData[k]);
+        if(n !== null){
+          totalFromData = n;
+          break;
+        }
       }
     }
   }
 
-  // Nếu không có cột tổng thì dùng totalCalc
   const totalFinal = (totalFromData !== null) ? totalFromData : totalCalc;
-
   document.getElementById("totalAmount").innerText = formatMoney(totalFinal);
 
-  // Nếu bảng trống hoàn toàn
   if(!hasAnyRow){
-    // vẫn giữ layout corporate, nhưng báo không có dòng lương
     tbody.innerHTML = `
       <tr>
         <td colspan="3" style="color:#64748b;font-style:italic;">${t("notFound")}</td>
