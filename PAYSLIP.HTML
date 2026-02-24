@@ -3,6 +3,7 @@
 <head>
 <meta charset="UTF-8">
 <title>Payslip</title>
+
 <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
 
 <style>
@@ -10,24 +11,24 @@ body{
 margin:0;
 font-family: "Segoe UI", Arial;
 background:#0f172a;
-color:#1e293b;
 display:flex;
 justify-content:center;
 padding:40px;
 }
 
 .card{
-width:900px;
+width:950px;
 background:white;
-border-radius:15px;
+border-radius:18px;
 overflow:hidden;
-box-shadow:0 25px 60px rgba(0,0,0,0.3);
+box-shadow:0 30px 80px rgba(0,0,0,0.5);
 }
 
+/* HEADER */
 .header{
 background:linear-gradient(90deg,#0f172a,#1e3a8a);
 color:white;
-padding:30px;
+padding:35px;
 display:flex;
 justify-content:space-between;
 align-items:center;
@@ -35,8 +36,8 @@ align-items:center;
 
 .header h1{
 margin:0;
-letter-spacing:2px;
-font-size:28px;
+letter-spacing:3px;
+font-size:30px;
 }
 
 .period{
@@ -44,27 +45,29 @@ font-size:18px;
 opacity:0.9;
 }
 
+/* SECTION */
 .section{
-padding:30px;
+padding:35px;
 }
 
+/* INFO GRID */
 .info-grid{
 display:grid;
 grid-template-columns:1fr 1fr;
 gap:20px;
-margin-bottom:30px;
+margin-bottom:35px;
 }
 
 .info-box{
 background:#f1f5f9;
 padding:15px;
-border-radius:8px;
+border-radius:10px;
 }
 
 .info-title{
 font-size:12px;
 color:#64748b;
-margin-bottom:5px;
+margin-bottom:6px;
 }
 
 .info-value{
@@ -72,6 +75,7 @@ font-size:15px;
 font-weight:600;
 }
 
+/* TABLE */
 table{
 width:100%;
 border-collapse:collapse;
@@ -79,13 +83,13 @@ border-collapse:collapse;
 
 th{
 text-align:left;
-padding:12px;
+padding:14px;
 background:#e2e8f0;
 font-size:13px;
 }
 
 td{
-padding:12px;
+padding:14px;
 border-bottom:1px solid #e5e7eb;
 font-size:14px;
 }
@@ -99,20 +103,21 @@ font-weight:600;
 .ded{color:#dc2626;}
 .adj{color:#2563eb;}
 
+/* TOTAL */
 .total-box{
-margin-top:25px;
+margin-top:30px;
 background:#0f172a;
 color:white;
-padding:25px;
-border-radius:12px;
+padding:30px;
+border-radius:14px;
 display:flex;
 justify-content:space-between;
 align-items:center;
-font-size:18px;
+font-size:20px;
 }
 
 .total-box span{
-font-size:28px;
+font-size:30px;
 font-weight:bold;
 color:#facc15;
 }
@@ -121,18 +126,8 @@ color:#facc15;
 text-align:center;
 font-size:12px;
 color:#64748b;
-padding:20px;
+padding:25px;
 border-top:1px solid #e5e7eb;
-}
-
-.back-btn{
-margin:20px;
-background:#1e293b;
-color:white;
-padding:10px 20px;
-border:none;
-border-radius:8px;
-cursor:pointer;
 }
 </style>
 </head>
@@ -148,17 +143,7 @@ cursor:pointer;
 
 <div class="section">
 
-<div class="info-grid">
-<div class="info-box">
-<div class="info-title">EMPLOYEE ID</div>
-<div class="info-value" id="empId"></div>
-</div>
-
-<div class="info-box">
-<div class="info-title">FULL NAME</div>
-<div class="info-value" id="fullName"></div>
-</div>
-</div>
+<div class="info-grid" id="infoGrid"></div>
 
 <h3>Salary Breakdown</h3>
 
@@ -190,12 +175,14 @@ This is a computer-generated salary statement. No signature required.
 
 const supabaseUrl="https://apbaseiweunvfgeubvzp.supabase.co";
 const supabaseKey="sb_publishable_Dwob1zf-bHC2etDsbnJREw_sgaHuQDL";
+
 const { createClient } = supabase;
 const db=createClient(supabaseUrl,supabaseKey);
 
 async function loadSlip(){
 
 const emp_id=localStorage.getItem("emp_id");
+
 if(!emp_id){
 window.location.href="index.html";
 return;
@@ -210,7 +197,6 @@ return;
 }
 
 document.getElementById("periodText").innerText=period;
-document.getElementById("empId").innerText=emp_id;
 
 const {data,error}=await db
 .from("salaries")
@@ -226,26 +212,58 @@ return;
 
 const salaryData=data.data;
 
-document.getElementById("fullName").innerText=salaryData["姓名"] || "-";
+/* ===== EMPLOYEE INFO ===== */
+
+const info=document.getElementById("infoGrid");
+
+function addInfo(title,value){
+info.innerHTML+=`
+<div class="info-box">
+<div class="info-title">${title}</div>
+<div class="info-value">${value ?? "-"}</div>
+</div>`;
+}
+
+addInfo("盘口",salaryData["盘口"]);
+addInfo("岗位",salaryData["岗位"]);
+addInfo("ID",salaryData["ID"]);
+addInfo("姓名",salaryData["姓名"]);
+addInfo("卡号",salaryData["卡号"]);
+addInfo("银行姓名",salaryData["银行姓名"]);
+addInfo("银行/GCASH",salaryData["银行/GCASH"]);
+addInfo("备注",salaryData["备注"]);
+
+/* ===== SALARY BREAKDOWN ===== */
 
 let total=0;
-let body=document.getElementById("salaryBody");
+const body=document.getElementById("salaryBody");
 
 function formatMoney(num){
 return Number(num).toLocaleString();
 }
 
-for(let key in salaryData){
+const fields=[
+"基础工资",
+"出勤工资",
+"1-15 工资",
+"满勤",
+"额外加扣",
+"押金",
+"休假扣除"
+];
 
-let value=salaryData[key];
-if(!value || key==="ID") continue;
+fields.forEach(field=>{
+
+let value=salaryData[field];
+if(value===undefined || value===null || value==="") value=0;
 
 let amount=Number(value);
-if(isNaN(amount)) continue;
+if(isNaN(amount)) amount=0;
 
 let type="earn";
-if(key.includes("扣") || key.includes("押")) type="ded";
-if(key.includes("额外") || key.includes("调整")) type="adj";
+
+if(field.includes("扣") || field.includes("押")) type="ded";
+if(field.includes("额外")) type="adj";
 
 if(type==="earn") total+=amount;
 if(type==="ded") total-=amount;
@@ -253,14 +271,13 @@ if(type==="adj") total+=amount;
 
 body.innerHTML+=`
 <tr>
-<td>${key}</td>
+<td>${field}</td>
 <td>${type.toUpperCase()}</td>
 <td class="amount ${type}">
 ${type==="ded"?"- ":"+ "}${formatMoney(amount)}
 </td>
-</tr>
-`;
-}
+</tr>`;
+});
 
 document.getElementById("totalAmount").innerText=formatMoney(total);
 
