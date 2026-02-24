@@ -49,28 +49,35 @@ opacity:0.9;
 padding:35px;
 }
 
-.info-grid{
-display:grid;
-grid-template-columns:1fr 1fr;
-gap:20px;
-margin-bottom:35px;
+.section-title{
+letter-spacing:2px;
+font-size:13px;
+color:#64748b;
+margin-bottom:15px;
 }
 
-.info-box{
-background:#f1f5f9;
+.info-table{
+width:100%;
+border-collapse:collapse;
+margin-bottom:30px;
+}
+
+.info-table td{
+border:1px solid #e5e7eb;
 padding:15px;
-border-radius:10px;
+background:#f8fafc;
 }
 
-.info-title{
+.label{
 font-size:12px;
 color:#64748b;
-margin-bottom:6px;
+letter-spacing:1px;
+margin-bottom:5px;
 }
 
-.info-value{
-font-size:15px;
+.value{
 font-weight:600;
+font-size:15px;
 }
 
 table{
@@ -118,14 +125,6 @@ font-weight:bold;
 color:#facc15;
 }
 
-.footer{
-text-align:center;
-font-size:12px;
-color:#64748b;
-padding:25px;
-border-top:1px solid #e5e7eb;
-}
-
 .btn-group{
 margin-top:30px;
 display:flex;
@@ -148,6 +147,14 @@ color:white;
 .download-btn{
 background:linear-gradient(45deg,#3b82f6,#06b6d4);
 color:white;
+}
+
+.footer{
+text-align:center;
+font-size:12px;
+color:#64748b;
+padding:25px;
+border-top:1px solid #e5e7eb;
 }
 </style>
 </head>
@@ -173,16 +180,52 @@ color:white;
 
 <div class="section">
 
-<div class="info-grid" id="infoGrid"></div>
+<!-- EMPLOYEE INFORMATION -->
+<div class="section-title">EMPLOYEE INFORMATION</div>
+
+<table class="info-table">
+<tr>
+<td>
+<div class="label">EMPLOYEE ID</div>
+<div class="value" id="empId"></div>
+</td>
+<td>
+<div class="label">FULL NAME</div>
+<div class="value" id="fullName"></div>
+</td>
+</tr>
+
+<tr>
+<td>
+<div class="label">PLATFORM</div>
+<div class="value" id="platform"></div>
+</td>
+<td>
+<div class="label">POSITION</div>
+<div class="value" id="position"></div>
+</td>
+</tr>
+
+<tr>
+<td>
+<div class="label">ACCOUNT TYPE</div>
+<div class="value" id="accountType"></div>
+</td>
+<td>
+<div class="label">ACCOUNT NUMBER</div>
+<div class="value" id="accountNumber"></div>
+</td>
+</tr>
+</table>
 
 <h3 id="breakdownText">Salary Breakdown</h3>
 
 <table>
 <thead>
 <tr>
-<th id="descText">Description</th>
-<th id="typeText">Type</th>
-<th class="amount" id="amountText">Amount</th>
+<th>Description</th>
+<th>Type</th>
+<th class="amount">Amount</th>
 </tr>
 </thead>
 <tbody id="salaryBody"></tbody>
@@ -213,33 +256,16 @@ const supabaseKey="sb_publishable_Dwob1zf-bHC2etDsbnJREw_sgaHuQDL";
 const { createClient } = supabase;
 const db=createClient(supabaseUrl,supabaseKey);
 
-const dictionary={
-cn:{title:"工资单",breakdown:"工资明细",desc:"项目",type:"类型",amount:"金额",total:"实发工资",remark:"备注"},
-vi:{title:"Phiếu Lương",breakdown:"Chi tiết lương",desc:"Hạng mục",type:"Loại",amount:"Số tiền",total:"Thực nhận",remark:"Ghi chú"},
-en:{title:"Payslip",breakdown:"Salary Breakdown",desc:"Description",type:"Type",amount:"Amount",total:"Total Take Home Pay",remark:"Remark"},
-ph:{title:"Payslip",breakdown:"Breakdown ng Sahod",desc:"Paglalarawan",type:"Uri",amount:"Halaga",total:"Kabuuang Natanggap",remark:"Tala"}
-};
-
-let currentLang=localStorage.getItem("lang")||"cn";
 let salaryDataGlobal=null;
+let currentLang=localStorage.getItem("lang")||"cn";
 
 function changeLang(){
 currentLang=document.getElementById("langSelect").value;
 localStorage.setItem("lang",currentLang);
-applyLang();
-}
-
-function applyLang(){
-const lang=dictionary[currentLang];
-document.getElementById("titleText").innerText=lang.title;
-document.getElementById("breakdownText").innerText=lang.breakdown;
-document.getElementById("descText").innerText=lang.desc;
-document.getElementById("typeText").innerText=lang.type;
-document.getElementById("amountText").innerText=lang.amount;
-document.getElementById("totalText").innerText=lang.total;
 }
 
 async function loadSlip(){
+
 const emp_id=localStorage.getItem("emp_id");
 if(!emp_id){window.location.href="index.html";return;}
 
@@ -255,17 +281,27 @@ const {data}=await db
 .single();
 
 salaryDataGlobal=data.data;
+
+/* EMPLOYEE INFO */
+document.getElementById("empId").innerText=emp_id;
+document.getElementById("fullName").innerText=salaryDataGlobal["姓名"]||"-";
+document.getElementById("platform").innerText=salaryDataGlobal["盘口"]||"-";
+document.getElementById("position").innerText=salaryDataGlobal["岗位"]||"-";
+document.getElementById("accountType").innerText=salaryDataGlobal["银行/GCASH"]||"-";
+document.getElementById("accountNumber").innerText=salaryDataGlobal["卡号"]||"-";
+
 renderSalary();
-applyLang();
 }
 
 function renderSalary(){
+
 const body=document.getElementById("salaryBody");
 body.innerHTML="";
 
 let total=salaryDataGlobal["1-15 工资"]||0;
 
 for(let key in salaryDataGlobal){
+
 let rawValue=salaryDataGlobal[key];
 if(rawValue===undefined||rawValue===null||rawValue===""||rawValue==="NaN") continue;
 
@@ -290,7 +326,7 @@ if(salaryDataGlobal["备注"]){
 body.innerHTML+=`
 <tr>
 <td colspan="3" style="padding-top:20px;font-style:italic;color:#64748b">
-${dictionary[currentLang].remark}: ${salaryDataGlobal["备注"]}
+备注: ${salaryDataGlobal["备注"]}
 </td>
 </tr>`;
 }
