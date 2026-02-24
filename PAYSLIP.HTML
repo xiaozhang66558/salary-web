@@ -3,44 +3,129 @@
 <head>
 <meta charset="UTF-8">
 <title>Payslip</title>
-<script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
 
 <style>
 body{
-background:radial-gradient(circle at 20% 20%, #1f2a48, #0f172a 60%);
-color:white;
-font-family:Segoe UI;
+margin:0;
+font-family: "Segoe UI", Arial;
+background:#0f172a;
+color:#1e293b;
+display:flex;
+justify-content:center;
 padding:40px;
 }
+
 .card{
-background:rgba(255,255,255,0.05);
-backdrop-filter:blur(25px);
-border-radius:20px;
-padding:40px;
-width:800px;
-margin:auto;
-box-shadow:0 20px 60px rgba(0,0,0,0.6);
+width:900px;
+background:white;
+border-radius:15px;
+overflow:hidden;
+box-shadow:0 25px 60px rgba(0,0,0,0.3);
 }
-h2{margin-bottom:20px;}
-.row{
+
+/* HEADER */
+.header{
+background:linear-gradient(90deg,#0f172a,#1e3a8a);
+color:white;
+padding:30px;
 display:flex;
 justify-content:space-between;
-padding:10px 0;
-border-bottom:1px solid rgba(255,255,255,0.1);
+align-items:center;
 }
-.total{
-font-weight:bold;
+
+.header h1{
+margin:0;
+letter-spacing:2px;
+font-size:28px;
+}
+
+.period{
 font-size:18px;
-color:#4ade80;
+opacity:0.9;
 }
-button{
-margin-top:20px;
-padding:12px 20px;
-border:none;
-border-radius:10px;
-background:linear-gradient(45deg,#3b82f6,#06b6d4);
+
+/* SECTION */
+.section{
+padding:30px;
+}
+
+.info-grid{
+display:grid;
+grid-template-columns:1fr 1fr;
+gap:20px;
+margin-bottom:30px;
+}
+
+.info-box{
+background:#f1f5f9;
+padding:15px;
+border-radius:8px;
+}
+
+.info-title{
+font-size:12px;
+color:#64748b;
+margin-bottom:5px;
+}
+
+.info-value{
+font-size:15px;
+font-weight:600;
+}
+
+/* TABLE */
+table{
+width:100%;
+border-collapse:collapse;
+}
+
+th{
+text-align:left;
+padding:12px;
+background:#e2e8f0;
+font-size:13px;
+}
+
+td{
+padding:12px;
+border-bottom:1px solid #e5e7eb;
+font-size:14px;
+}
+
+.amount{
+text-align:right;
+font-weight:600;
+}
+
+.earn{color:#16a34a;}
+.ded{color:#dc2626;}
+.adj{color:#2563eb;}
+
+/* TOTAL */
+.total-box{
+margin-top:25px;
+background:#0f172a;
 color:white;
-cursor:pointer;
+padding:25px;
+border-radius:12px;
+display:flex;
+justify-content:space-between;
+align-items:center;
+font-size:18px;
+}
+
+.total-box span{
+font-size:28px;
+font-weight:bold;
+color:#facc15;
+}
+
+.footer{
+text-align:center;
+font-size:12px;
+color:#64748b;
+padding:20px;
+border-top:1px solid #e5e7eb;
 }
 </style>
 </head>
@@ -49,81 +134,101 @@ cursor:pointer;
 
 <div class="card">
 
-<h2 id="header"></h2>
+<div class="header">
+<h1>PAYSLIP</h1>
+<div class="period" id="periodText"></div>
+</div>
 
-<div id="salaryData"></div>
+<div class="section">
 
-<button onclick="goBack()">Back</button>
+<div class="info-grid">
+<div class="info-box">
+<div class="info-title">EMPLOYEE ID</div>
+<div class="info-value" id="empId"></div>
+</div>
+
+<div class="info-box">
+<div class="info-title">FULL NAME</div>
+<div class="info-value" id="fullName"></div>
+</div>
+</div>
+
+<h3>Salary Breakdown</h3>
+
+<table id="salaryTable">
+<thead>
+<tr>
+<th>Description</th>
+<th>Type</th>
+<th class="amount">Amount</th>
+</tr>
+</thead>
+<tbody></tbody>
+</table>
+
+<div class="total-box">
+<div>Total Take Home Pay</div>
+<span id="totalAmount">0</span>
+</div>
+
+</div>
+
+<div class="footer">
+This is a computer-generated salary statement. No signature required.
+</div>
 
 </div>
 
 <script>
+const salaryData = JSON.parse(localStorage.getItem("salaryData"));
+const period = localStorage.getItem("period");
+const empId = localStorage.getItem("emp_id");
 
-const supabaseUrl="https://apbaseiweunvfgeubvzp.supabase.co";
-const supabaseKey="sb_publishable_Dwob1zf-bHC2etDsbnJREw_sgaHuQDL";
-
-const { createClient } = supabase;
-const db=createClient(supabaseUrl,supabaseKey);
-
-async function loadSlip(){
-
-const emp_id=localStorage.getItem("emp_id");
-if(!emp_id){
-window.location.href="index.html";
-return;
+if(!salaryData){
+document.body.innerHTML="<h2 style='color:white'>No salary data found.</h2>";
+throw new Error("No salary");
 }
 
-const params=new URLSearchParams(window.location.search);
-const period=params.get("period");
+document.getElementById("periodText").innerText = period;
+document.getElementById("empId").innerText = empId;
+document.getElementById("fullName").innerText = salaryData["姓名"] || "-";
 
-document.getElementById("header").innerText=`Payslip - ${period}`;
+const tbody = document.querySelector("#salaryTable tbody");
 
-const {data}=await db.from("salaries")
-.select("*")
-.eq("emp_id",emp_id)
-.eq("period",period)
-.single();
+let total = 0;
 
-const salary=data.data;
-
-let html="";
-let total=0;
-
-for(let key in salary){
-
-let value=Number(salary[key]);
-
-if(key.toLowerCase()==="total"){
-continue;
+function formatMoney(num){
+return Number(num).toLocaleString();
 }
 
-total+=value;
+for(let key in salaryData){
 
-html+=`
-<div class="row">
-<div>${key}</div>
-<div>${value.toLocaleString()}</div>
-</div>
-`;
-}
+let value = salaryData[key];
+if(!value || value==="NaN" || key==="ID") continue;
 
-html+=`
-<div class="row total">
-<div>Total</div>
-<div>${total.toLocaleString()}</div>
-</div>
+let amount = Number(value);
+if(isNaN(amount)) continue;
+
+let type="earn";
+if(key.includes("扣") || key.includes("押")) type="ded";
+if(key.includes("额外") || key.includes("调整")) type="adj";
+
+if(type==="earn") total += amount;
+if(type==="ded") total -= amount;
+if(type==="adj") total += amount;
+
+let row = `
+<tr>
+<td>${key}</td>
+<td>${type.toUpperCase()}</td>
+<td class="amount ${type}">${type==="ded"?"- ":"+ "}${formatMoney(amount)}</td>
+</tr>
 `;
 
-document.getElementById("salaryData").innerHTML=html;
-
+tbody.innerHTML += row;
 }
 
-function goBack(){
-window.location.href="dashboard.html";
-}
-
-loadSlip();
-
+document.getElementById("totalAmount").innerText = formatMoney(total);
 </script>
 
 </body>
