@@ -3,13 +3,12 @@
 <head>
 <meta charset="UTF-8">
 <title>Payslip</title>
-
 <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
 
 <style>
 body{
 margin:0;
-font-family: "Segoe UI", Arial;
+font-family:"Segoe UI",Arial;
 background:#0f172a;
 display:flex;
 justify-content:center;
@@ -24,7 +23,6 @@ overflow:hidden;
 box-shadow:0 30px 80px rgba(0,0,0,0.5);
 }
 
-/* HEADER */
 .header{
 background:linear-gradient(90deg,#0f172a,#1e3a8a);
 color:white;
@@ -45,12 +43,10 @@ font-size:18px;
 opacity:0.9;
 }
 
-/* SECTION */
 .section{
 padding:35px;
 }
 
-/* INFO GRID */
 .info-grid{
 display:grid;
 grid-template-columns:1fr 1fr;
@@ -75,7 +71,6 @@ font-size:15px;
 font-weight:600;
 }
 
-/* TABLE */
 table{
 width:100%;
 border-collapse:collapse;
@@ -103,7 +98,6 @@ font-weight:600;
 .ded{color:#dc2626;}
 .adj{color:#2563eb;}
 
-/* TOTAL */
 .total-box{
 margin-top:30px;
 background:#0f172a;
@@ -137,36 +131,46 @@ border-top:1px solid #e5e7eb;
 <div class="card">
 
 <div class="header">
-<h1>PAYSLIP</h1>
+<h1 id="titleText">PAYSLIP</h1>
+
+<div style="display:flex;align-items:center;gap:15px;">
+<select id="langSelect" onchange="changeLang()" style="padding:6px;border-radius:6px;">
+<option value="cn">中文</option>
+<option value="vi">Tiếng Việt</option>
+<option value="en">English</option>
+<option value="ph">Filipino</option>
+</select>
+
 <div class="period" id="periodText"></div>
+</div>
 </div>
 
 <div class="section">
 
 <div class="info-grid" id="infoGrid"></div>
 
-<h3>Salary Breakdown</h3>
+<h3 id="breakdownText">Salary Breakdown</h3>
 
 <table>
 <thead>
 <tr>
-<th>Description</th>
-<th>Type</th>
-<th class="amount">Amount</th>
+<th id="descText">Description</th>
+<th id="typeText">Type</th>
+<th class="amount" id="amountText">Amount</th>
 </tr>
 </thead>
 <tbody id="salaryBody"></tbody>
 </table>
 
 <div class="total-box">
-<div>Total Take Home Pay</div>
+<div id="totalText">Total Take Home Pay</div>
 <span id="totalAmount">0</span>
 </div>
 
 </div>
 
 <div class="footer">
-This is a computer-generated salary statement. No signature required.
+This is a computer-generated salary statement.
 </div>
 
 </div>
@@ -175,14 +179,120 @@ This is a computer-generated salary statement. No signature required.
 
 const supabaseUrl="https://apbaseiweunvfgeubvzp.supabase.co";
 const supabaseKey="sb_publishable_Dwob1zf-bHC2etDsbnJREw_sgaHuQDL";
-
 const { createClient } = supabase;
 const db=createClient(supabaseUrl,supabaseKey);
+
+/* ===== LANGUAGE DICTIONARY ===== */
+
+const dictionary = {
+
+cn:{
+title:"工资单",
+breakdown:"工资明细",
+desc:"项目",
+type:"类型",
+amount:"金额",
+total:"实发工资",
+remark:"备注",
+fields:{
+"基础工资":"基础工资",
+"出勤工资":"出勤工资",
+"满勤":"满勤",
+"额外加扣":"额外加扣",
+"押金":"押金",
+"休假扣除":"休假扣除"
+}
+},
+
+vi:{
+title:"Phiếu Lương",
+breakdown:"Chi tiết lương",
+desc:"Hạng mục",
+type:"Loại",
+amount:"Số tiền",
+total:"Thực nhận",
+remark:"Ghi chú",
+fields:{
+"基础工资":"Lương cơ bản",
+"出勤工资":"Lương chuyên cần",
+"满勤":"Thưởng chuyên cần",
+"额外加扣":"Điều chỉnh thêm",
+"押金":"Tiền cọc",
+"休假扣除":"Khấu trừ nghỉ phép"
+}
+},
+
+en:{
+title:"Payslip",
+breakdown:"Salary Breakdown",
+desc:"Description",
+type:"Type",
+amount:"Amount",
+total:"Total Take Home Pay",
+remark:"Remark",
+fields:{
+"基础工资":"Basic Salary",
+"出勤工资":"Attendance Salary",
+"满勤":"Full Attendance Bonus",
+"额外加扣":"Adjustment",
+"押金":"Deposit",
+"休假扣除":"Leave Deduction"
+}
+},
+
+ph:{
+title:"Payslip",
+breakdown:"Breakdown ng Sahod",
+desc:"Paglalarawan",
+type:"Uri",
+amount:"Halaga",
+total:"Kabuuang Natanggap",
+remark:"Tala",
+fields:{
+"基础工资":"Batayang Sahod",
+"出勤工资":"Sahod sa Attendance",
+"满勤":"Bonus sa Attendance",
+"额外加扣":"Adjustment",
+"押金":"Deposit",
+"休假扣除":"Bawas sa Leave"
+}
+}
+
+};
+
+let currentLang = localStorage.getItem("lang") || "cn";
+let salaryDataGlobal=null;
+
+/* ===== CHANGE LANGUAGE ===== */
+
+function changeLang(){
+currentLang=document.getElementById("langSelect").value;
+localStorage.setItem("lang",currentLang);
+applyLang();
+}
+
+function applyLang(){
+
+const lang=dictionary[currentLang];
+
+document.getElementById("titleText").innerText=lang.title;
+document.getElementById("breakdownText").innerText=lang.breakdown;
+document.getElementById("descText").innerText=lang.desc;
+document.getElementById("typeText").innerText=lang.type;
+document.getElementById("amountText").innerText=lang.amount;
+document.getElementById("totalText").innerText=lang.total;
+
+if(salaryDataGlobal){
+renderSalary();
+}
+
+}
+
+/* ===== LOAD DATA ===== */
 
 async function loadSlip(){
 
 const emp_id=localStorage.getItem("emp_id");
-
 if(!emp_id){
 window.location.href="index.html";
 return;
@@ -190,105 +300,63 @@ return;
 
 const urlParams=new URLSearchParams(window.location.search);
 const period=urlParams.get("period");
-
-if(!period){
-document.body.innerHTML="<h2 style='color:white'>No salary data found.</h2>";
-return;
-}
-
 document.getElementById("periodText").innerText=period;
 
-const {data,error}=await db
+const {data}=await db
 .from("salaries")
 .select("*")
 .eq("emp_id",emp_id)
 .eq("period",period)
 .single();
 
-if(error || !data){
-document.body.innerHTML="<h2 style='color:white'>No salary data found.</h2>";
-return;
+salaryDataGlobal=data.data;
+renderSalary();
+applyLang();
 }
 
-const salaryData=data.data;
+/* ===== RENDER SALARY ===== */
 
-/* ===== EMPLOYEE INFO ===== */
+function renderSalary(){
 
-const info=document.getElementById("infoGrid");
-
-function addInfo(title,value){
-info.innerHTML+=`
-<div class="info-box">
-<div class="info-title">${title}</div>
-<div class="info-value">${value ?? "-"}</div>
-</div>`;
-}
-
-addInfo("盘口",salaryData["盘口"]);
-addInfo("岗位",salaryData["岗位"]);
-addInfo("ID",salaryData["ID"]);
-addInfo("姓名",salaryData["姓名"]);
-addInfo("卡号",salaryData["卡号"]);
-addInfo("银行姓名",salaryData["银行姓名"]);
-addInfo("银行/GCASH",salaryData["银行/GCASH"]);
-
-/* ===== SALARY BREAKDOWN ===== */
-
+const lang=dictionary[currentLang];
 const body=document.getElementById("salaryBody");
+body.innerHTML="";
 
-function formatMoney(num){
-return Number(num || 0).toLocaleString();
-}
+let total=salaryDataGlobal["1-15 工资"] || 0;
 
-const fields=[
-"基础工资",
-"出勤工资",
-"满勤",
-"额外加扣",
-"押金",
-"休假扣除"
-];
+for(let key in salaryDataGlobal){
 
-fields.forEach(field=>{
+if(!lang.fields[key]) continue;
 
-let value=salaryData[field];
-if(value===undefined || value===null || value==="") value=0;
-
-let amount=Number(value);
-if(isNaN(amount)) amount=0;
-
+let value=salaryDataGlobal[key] || 0;
 let type="earn";
-if(field.includes("扣") || field.includes("押")) type="ded";
-if(field.includes("额外")) type="adj";
+if(key.includes("扣")||key.includes("押")) type="ded";
+if(key.includes("额外")) type="adj";
 
 body.innerHTML+=`
 <tr>
-<td>${field}</td>
+<td>${lang.fields[key]}</td>
 <td>${type.toUpperCase()}</td>
-<td class="amount ${type}">
-${type==="ded"?"- ":"+ "}${formatMoney(amount)}
-</td>
+<td class="amount ${type}">${Number(value).toLocaleString()}</td>
 </tr>`;
-});
+}
 
-/* ===== 备注 放在最后一行 ===== */
-
-if(salaryData["备注"]){
+/* REMARK */
+if(salaryDataGlobal["备注"]){
 body.innerHTML+=`
 <tr>
 <td colspan="3" style="padding-top:20px;font-style:italic;color:#64748b">
-备注: ${salaryData["备注"]}
+${lang.remark}: ${salaryDataGlobal["备注"]}
 </td>
 </tr>`;
 }
 
-/* ===== 总工资 = 直接取 Excel 列 P ===== */
-
-let total=salaryData["1-15 工资"] || 0;
-document.getElementById("totalAmount").innerText=formatMoney(total);
+document.getElementById("totalAmount").innerText=
+Number(total).toLocaleString();
 
 }
 
+document.getElementById("langSelect").value=currentLang;
 loadSlip();
 
 </script>
