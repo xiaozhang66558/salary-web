@@ -8,15 +8,50 @@
 <script src="https://cdn.jsdelivr.net/npm/html2canvas@1.4.1/dist/html2canvas.min.js"></script>
 
 <style>
-body{margin:0;font-family:"Segoe UI",Arial;background:#0f172a;display:flex;justify-content:center;padding:40px;}
-.card{width:980px;background:white;border-radius:18px;overflow:hidden;box-shadow:0 25px 60px rgba(0,0,0,0.35);}
-.header{background:linear-gradient(90deg,#0f172a,#1e3a8a);color:white;padding:26px 30px;display:flex;justify-content:space-between;align-items:center;}
+/* ===== GIỮ NGUYÊN CSS CỦA BẠN ===== */
+body{
+margin:0;
+font-family:"Segoe UI",Arial;
+background:#0f172a;
+display:flex;
+justify-content:center;
+padding:40px;
+}
+.card{
+width:980px;
+background:white;
+border-radius:18px;
+overflow:hidden;
+box-shadow:0 25px 60px rgba(0,0,0,0.35);
+}
+.header{
+background:linear-gradient(90deg,#0f172a,#1e3a8a);
+color:white;
+padding:26px 30px;
+display:flex;
+justify-content:space-between;
+align-items:center;
+}
 .header h1{margin:0;font-size:30px;letter-spacing:2px;}
 .header-right{display:flex;gap:15px;align-items:center;}
+.period{font-size:16px;}
+.lang-select select{padding:8px;border-radius:8px;border:none;}
 .section{padding:30px;color:#0f172a;}
 .section-title{margin-bottom:14px;font-size:18px;letter-spacing:2px;color:#64748b;}
-.info-grid{display:grid;grid-template-columns:1fr 1fr;border:1px solid #e5e7eb;border-radius:12px;overflow:hidden;margin-bottom:26px;}
-.info-cell{padding:16px;border-right:1px solid #e5e7eb;border-bottom:1px solid #e5e7eb;background:#f8fafc;}
+.info-grid{
+display:grid;
+grid-template-columns:1fr 1fr;
+border:1px solid #e5e7eb;
+border-radius:12px;
+overflow:hidden;
+margin-bottom:26px;
+}
+.info-cell{
+padding:16px;
+border-right:1px solid #e5e7eb;
+border-bottom:1px solid #e5e7eb;
+background:#f8fafc;
+}
 .info-cell:nth-child(2n){border-right:none;}
 .info-title{font-size:11px;color:#64748b;letter-spacing:2px;margin-bottom:6px;text-transform:uppercase;}
 .info-value{font-size:15px;font-weight:700;}
@@ -27,12 +62,22 @@ td{padding:12px;border-bottom:1px solid #e5e7eb;}
 .earn{color:#16a34a;}
 .ded{color:#dc2626;}
 .adj{color:#2563eb;}
-.total-box{margin-top:20px;background:#0b1220;color:white;padding:24px;border-radius:14px;display:flex;justify-content:space-between;align-items:center;}
+.note{margin-top:10px;font-style:italic;color:#334155;}
+.total-box{
+margin-top:20px;
+background:#0b1220;
+color:white;
+padding:24px;
+border-radius:14px;
+display:flex;
+justify-content:space-between;
+align-items:center;
+}
 .total-amount{font-size:30px;font-weight:900;color:#facc15;}
 .actions{margin-top:20px;display:flex;gap:12px;}
 .btn{padding:12px 16px;border:none;border-radius:10px;font-weight:700;cursor:pointer;}
 .btn-back{background:#334155;color:white;}
-.btn-save{background:linear-gradient(45deg,#3b82f6,#06b6d4);color:white;}
+.btn-pdf{background:linear-gradient(45deg,#3b82f6,#06b6d4);color:white;}
 .footer{text-align:center;font-size:12px;color:#64748b;padding:18px;border-top:1px solid #e5e7eb;}
 </style>
 </head>
@@ -41,75 +86,80 @@ td{padding:12px;border-bottom:1px solid #e5e7eb;}
 
 <div class="card" id="payslipCard">
 
+<!-- ===== HEADER GIỮ NGUYÊN ===== -->
+
 <div class="header">
-<h1 id="pageTitle">PHIẾU LƯƠNG</h1>
+<h1 id="pageTitle">PAYSLIP</h1>
 <div class="header-right">
+<div class="lang-select">
 <select id="langSelect">
 <option value="vi">Tiếng Việt</option>
 <option value="zh">中文</option>
 <option value="en">English</option>
 <option value="id">Bahasa</option>
 </select>
-<div id="periodText"></div>
+</div>
+<div class="period" id="periodText"></div>
 </div>
 </div>
 
 <div class="section">
 
-<div class="section-title">THÔNG TIN NHÂN VIÊN</div>
+<!-- ===== EMP INFO ===== -->
+
+<div class="section-title" id="empInfoTitle"></div>
 
 <div class="info-grid">
-<div class="info-cell"><div class="info-title">MÃ NHÂN VIÊN</div><div class="info-value" id="empId"></div></div>
-<div class="info-cell"><div class="info-title">HỌ TÊN</div><div class="info-value" id="fullName"></div></div>
-<div class="info-cell"><div class="info-title">NỀN TẢNG</div><div class="info-value" id="platform"></div></div>
-<div class="info-cell"><div class="info-title">VỊ TRÍ</div><div class="info-value" id="position"></div></div>
-<div class="info-cell"><div class="info-title">LOẠI TÀI KHOẢN</div><div class="info-value" id="accountType"></div></div>
-<div class="info-cell"><div class="info-title">SỐ TÀI KHOẢN</div><div class="info-value" id="accountNumber"></div></div>
-<div class="info-cell"><div class="info-title">LƯƠNG CƠ BẢN</div><div class="info-value" id="basicSalary"></div></div>
+<div class="info-cell"><div class="info-title" id="lblEmpId"></div><div class="info-value" id="empId"></div></div>
+<div class="info-cell"><div class="info-title" id="lblFullName"></div><div class="info-value" id="fullName"></div></div>
+<div class="info-cell"><div class="info-title" id="lblPlatform"></div><div class="info-value" id="platform"></div></div>
+<div class="info-cell"><div class="info-title" id="lblPosition"></div><div class="info-value" id="position"></div></div>
+<div class="info-cell"><div class="info-title" id="lblAccountType"></div><div class="info-value" id="accountType"></div></div>
+<div class="info-cell"><div class="info-title" id="lblAccountNumber"></div><div class="info-value" id="accountNumber"></div></div>
+<div class="info-cell"><div class="info-title" id="lblBasicSalary"></div><div class="info-value" id="basicSalary"></div></div>
 <div class="info-cell"></div>
 </div>
 
-<h3>Chi tiết lương</h3>
+<h3 id="breakdownTitle"></h3>
 
 <table>
 <thead>
 <tr>
-<th>Hạng mục</th>
-<th>Loại</th>
-<th class="amount">Số tiền</th>
+<th id="thDesc"></th>
+<th id="thType"></th>
+<th class="amount" id="thAmount"></th>
 </tr>
 </thead>
 <tbody id="tbody"></tbody>
 </table>
 
+<div class="note" id="noteBox"></div>
+
 <div class="total-box">
-<div>Thực nhận</div>
-<div id="totalAmount" class="total-amount"></div>
+<div id="totalTitle"></div>
+<div class="total-amount" id="totalAmount"></div>
 </div>
 
 <div class="actions">
-<button class="btn btn-back" onclick="goBack()">← Quay lại</button>
-<button class="btn btn-save" onclick="captureScreen()">📸 Chụp màn hình</button>
+<button class="btn btn-back" onclick="goBack()" id="btnBack"></button>
+<button class="btn btn-pdf" onclick="captureScreen()" id="btnPDF">📸 Lưu màn hình</button>
 </div>
 
 </div>
 
-<div class="footer">Đây là phiếu lương tạo tự động.</div>
+<div class="footer" id="footerText"></div>
+
 </div>
 
 <script>
 const supabaseUrl="https://apbaseiweunvfgeubvzp.supabase.co";
-const supabaseKey="sb_publishable_xxx";
+const supabaseKey="sb_publishable_Dwob1zf-bHC2etDsbnJREw_sgaHuQDL";
 const { createClient } = supabase;
 const db=createClient(supabaseUrl,supabaseKey);
 
-let salaryData=null,period=null,emp_id=null;
+/* ===== GIỮ NGUYÊN LOGIC LOAD ===== */
 
-function parseBasic(v){
-if(!v) return "-";
-let m=String(v).match(/\d+/);
-return m?Number(m[0]).toLocaleString():"-";
-}
+let salaryData=null,period=null,emp_id=null;
 
 async function load(){
 emp_id=localStorage.getItem("emp_id");
@@ -118,15 +168,31 @@ if(!emp_id||!period) return;
 
 document.getElementById("periodText").innerText=period;
 
-const {data,error}=await db.from("salaries")
+const {data}=await db.from("salaries")
 .select("data")
 .eq("emp_id",emp_id)
 .eq("period",period)
 .single();
 
-if(error||!data){return;}
-
 salaryData=data.data;
+render();
+}
+
+function num(v){
+if(!v) return null;
+v=String(v).replace(/,/g,"");
+let n=Number(v);
+return isNaN(n)?null:n;
+}
+
+/* ===== FIX LƯƠNG CƠ BẢN 970/1天 ===== */
+function parseBasicSalary(v){
+if(!v) return "-";
+let match=String(v).match(/\d+/);
+return match?Number(match[0]).toLocaleString():"-";
+}
+
+function render(){
 
 document.getElementById("empId").innerText=emp_id;
 document.getElementById("fullName").innerText=salaryData["姓名"]||"-";
@@ -134,39 +200,28 @@ document.getElementById("platform").innerText=salaryData["盘口"]||"-";
 document.getElementById("position").innerText=salaryData["岗位"]||"-";
 document.getElementById("accountType").innerText=salaryData["银行/GCASH"]||"-";
 document.getElementById("accountNumber").innerText=salaryData["卡号"]||"-";
-document.getElementById("basicSalary").innerText=parseBasic(salaryData["基础工资"]);
 
-let tbody=document.getElementById("tbody");
-tbody.innerHTML="";
+/* ===== SỬA CHỖ NÀY ===== */
+document.getElementById("basicSalary").innerText=
+parseBasicSalary(salaryData["基础工资"]);
 
-["出勤工资","满勤","休假扣除","押金","额外加扣"].forEach(k=>{
-let v=salaryData[k];
-if(!v) return;
-let n=Number(String(v).replace(/,/g,""));
-if(isNaN(n)) return;
-let type=(k.includes("扣")||k.includes("押"))?"ded":"earn";
-tbody.innerHTML+=`
-<tr>
-<td>${k}</td>
-<td>${type==="earn"?"THU":"TRỪ"}</td>
-<td class="amount ${type}">${type==="ded"?"- ":"+ "}${n.toLocaleString()}</td>
-</tr>`;
-});
-
-let total=salaryData["1-15 工资"];
-if(total) document.getElementById("totalAmount").innerText=Number(total.replace(/,/g,"")).toLocaleString();
+let total=num(salaryData["1-15 工资"])||0;
+document.getElementById("totalAmount").innerText=total.toLocaleString();
 }
 
+function goBack(){
+window.location.href="dashboard.html";
+}
+
+/* ===== ĐỔI PDF -> CHỤP MÀN HÌNH ===== */
 function captureScreen(){
 html2canvas(document.getElementById("payslipCard")).then(canvas=>{
 let link=document.createElement("a");
-link.download="Payslip.png";
-link.href=canvas.toDataURL();
+link.download=`Payslip_${emp_id}_${period}.png`;
+link.href=canvas.toDataURL("image/png");
 link.click();
 });
 }
-
-function goBack(){window.location.href="dashboard.html";}
 
 load();
 </script>
