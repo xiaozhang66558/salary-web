@@ -8,6 +8,7 @@
 
 <style>
 *{margin:0;padding:0;box-sizing:border-box;font-family:"Segoe UI",Arial;}
+
 body{
 height:100vh;
 display:flex;
@@ -16,6 +17,26 @@ align-items:center;
 background:radial-gradient(circle at 20% 20%, #1f2a48, #0f172a 60%);
 overflow:hidden;
 }
+
+/* Background blur */
+body::before{
+content:"";
+position:absolute;
+width:600px;height:600px;
+background:linear-gradient(45deg,#3b82f6,#06b6d4);
+filter:blur(150px);
+opacity:0.3;top:-200px;left:-200px;
+}
+body::after{
+content:"";
+position:absolute;
+width:500px;height:500px;
+background:linear-gradient(45deg,#6366f1,#9333ea);
+filter:blur(150px);
+opacity:0.25;bottom:-200px;right:-200px;
+}
+
+/* CARD */
 .card{
 position:relative;z-index:10;
 width:420px;padding:45px;
@@ -26,26 +47,121 @@ border:1px solid rgba(255,255,255,0.1);
 box-shadow:0 20px 60px rgba(0,0,0,0.6);
 color:white;
 }
+
 h2{text-align:center;margin-bottom:20px;font-weight:600;}
+
 .input-group{margin-top:20px;}
+
 input{
-width:100%;padding:14px;border-radius:10px;border:none;
+width:100%;padding:14px;
+border-radius:10px;border:none;
 background:rgba(255,255,255,0.1);
 color:white;font-size:14px;
-outline:none;
+outline:none;transition:0.3s;
 }
-.buttons{display:flex;justify-content:space-between;margin-top:25px;}
+input::placeholder{color:rgba(255,255,255,0.6);}
+input:focus{background:rgba(255,255,255,0.2);}
+
+/* BUTTONS */
+.buttons{
+display:flex;
+justify-content:space-between;
+margin-top:25px;
+gap:10px;
+}
+
 button{
-width:48%;padding:14px;border:none;
-border-radius:10px;font-size:14px;
+flex:1;
+padding:14px;
+border:none;
+border-radius:10px;
+font-size:14px;
 cursor:pointer;
+transition:0.3s;
+font-weight:600;
 }
-.login-btn{background:linear-gradient(45deg,#3b82f6,#06b6d4);color:white;}
-.register-btn{background:rgba(255,255,255,0.1);color:white;}
-.result{margin-top:20px;font-size:14px;}
-.extra{margin-top:15px;text-align:center;font-size:13px;cursor:pointer;color:#60a5fa;}
+
+.login-btn{
+background:linear-gradient(45deg,#3b82f6,#06b6d4);
+color:white;
+}
+.login-btn:hover{
+transform:translateY(-2px);
+box-shadow:0 10px 25px rgba(59,130,246,0.5);
+}
+
+.register-btn{
+background:rgba(255,255,255,0.15);
+color:white;
+}
+.register-btn:hover{
+background:rgba(255,255,255,0.25);
+}
+
+.result{
+margin-top:25px;
+font-size:14px;
+min-height:20px;
+}
+
 .lang-select{text-align:right;margin-bottom:15px;}
-select{padding:6px;border-radius:6px;background:rgba(255,255,255,0.1);color:white;border:none;}
+select{
+padding:6px;border-radius:6px;
+background:rgba(255,255,255,0.1);
+color:white;border:none;
+}
+
+/* ================= PIN MODAL ================= */
+
+.modal-overlay{
+position:fixed;
+top:0;left:0;
+width:100%;height:100%;
+background:rgba(0,0,0,0.6);
+display:none;
+justify-content:center;
+align-items:center;
+z-index:999;
+}
+
+.modal{
+width:360px;
+padding:30px;
+border-radius:20px;
+background:rgba(255,255,255,0.08);
+backdrop-filter:blur(30px);
+border:1px solid rgba(255,255,255,0.1);
+box-shadow:0 20px 60px rgba(0,0,0,0.6);
+color:white;
+text-align:center;
+}
+
+.modal h3{
+margin-bottom:15px;
+}
+
+.pin-input{
+margin-top:15px;
+padding:12px;
+width:100%;
+border-radius:10px;
+border:none;
+background:rgba(255,255,255,0.1);
+color:white;
+font-size:18px;
+text-align:center;
+letter-spacing:5px;
+}
+
+.modal-buttons{
+margin-top:20px;
+display:flex;
+gap:10px;
+}
+
+.modal-buttons button{
+flex:1;
+}
 </style>
 </head>
 
@@ -77,10 +193,24 @@ select{padding:6px;border-radius:6px;background:rgba(255,255,255,0.1);color:whit
 <button id="registerBtn" class="register-btn" onclick="register()"></button>
 </div>
 
-<div class="extra" onclick="forgotPassword()">🔑 Quên mật khẩu?</div>
+<div style="text-align:center;margin-top:15px;">
+<a href="#" onclick="forgotPassword()" style="color:#60a5fa;text-decoration:none;">🔑 <span id="forgotText">Quên mật khẩu?</span></a>
+</div>
 
 <div class="result" id="result"></div>
 
+</div>
+
+<!-- PIN MODAL -->
+<div class="modal-overlay" id="pinModal">
+<div class="modal">
+<h3 id="pinTitle">Tạo mã bảo mật 4 số</h3>
+<input type="password" maxlength="4" id="pinInput" class="pin-input" placeholder="••••">
+<div class="modal-buttons">
+<button class="register-btn" onclick="closePinModal()">Huỷ</button>
+<button class="login-btn" onclick="confirmPin()">Xác nhận</button>
+</div>
+</div>
 </div>
 
 <script>
@@ -89,29 +219,35 @@ const supabaseKey = "sb_publishable_Dwob1zf-bHC2etDsbnJREw_sgaHuQDL";
 const { createClient } = supabase;
 const supabaseClient = createClient(supabaseUrl, supabaseKey);
 
-/* ================= LOGIN ================= */
+let tempUserId = null;
 
+/* ===== LOGIN ===== */
 async function login(){
-const id=userId.value.trim();
-const pass=password.value.trim();
-const res=result;
+const id=document.getElementById("userId").value.trim();
+const password=document.getElementById("password").value.trim();
+const res=document.getElementById("result");
 
 const { data } = await supabaseClient
-.from("employees")
+.from('employees')
 .select("*")
 .eq("emp_id",id)
-.eq("password_hash",pass)
+.eq("password_hash",password)
 .single();
 
 if(!data){
-res.innerHTML="❌ Sai ID hoặc mật khẩu";
+res.innerHTML="❌ Sai mật khẩu";
 return;
 }
 
-/* yêu cầu nhập PIN */
-let pin = prompt("Nhập mã bảo mật 4 số:");
-if(!pin || pin !== data.pin_code){
-res.innerHTML="❌ Sai mã bảo mật";
+if(!data.pin_code){
+tempUserId=id;
+openPinModal();
+return;
+}
+
+let pin=prompt("Nhập mã PIN 4 số:");
+if(pin!==data.pin_code){
+res.innerHTML="❌ Sai mã PIN";
 return;
 }
 
@@ -119,21 +255,14 @@ localStorage.setItem("emp_id", id);
 window.location.href="dashboard.html";
 }
 
-/* ================= REGISTER ================= */
-
+/* ===== REGISTER ===== */
 async function register(){
-const id=userId.value.trim();
-const pass=password.value.trim();
-const res=result;
+const id=document.getElementById("userId").value.trim();
+const password=document.getElementById("password").value.trim();
+const res=document.getElementById("result");
 
-if(!id||!pass){
-res.innerHTML="❌ Vui lòng nhập đủ thông tin";
-return;
-}
-
-/* kiểm tra tồn tại */
 const { data } = await supabaseClient
-.from("employees")
+.from('employees')
 .select("emp_id")
 .eq("emp_id",id)
 .single();
@@ -143,54 +272,64 @@ res.innerHTML="❌ ID đã tồn tại";
 return;
 }
 
-/* tạo password */
 await supabaseClient
-.from("employees")
-.insert([{ emp_id:id, password_hash:pass }]);
+.from('employees')
+.insert([{ emp_id:id, password_hash:password }]);
 
-/* yêu cầu tạo PIN */
-let pin = prompt("Tạo mã bảo mật 4 số:");
-if(!pin || pin.length!==4){
-res.innerHTML="❌ Mã phải 4 số";
+tempUserId=id;
+openPinModal();
+}
+
+/* ===== PIN MODAL ===== */
+
+function openPinModal(){
+document.getElementById("pinModal").style.display="flex";
+}
+
+function closePinModal(){
+document.getElementById("pinModal").style.display="none";
+}
+
+async function confirmPin(){
+const pin=document.getElementById("pinInput").value.trim();
+if(pin.length!==4){
+alert("PIN phải 4 số");
 return;
 }
 
 await supabaseClient
-.from("employees")
-.update({ pin_code: pin })
-.eq("emp_id", id);
+.from('employees')
+.update({ pin_code:pin })
+.eq("emp_id",tempUserId);
 
-res.innerHTML="✅ Thiết lập thành công";
+closePinModal();
+localStorage.setItem("emp_id", tempUserId);
+window.location.href="dashboard.html";
 }
 
-/* ================= FORGOT PASSWORD ================= */
+/* ===== FORGOT PASSWORD ===== */
 
 async function forgotPassword(){
-let id = prompt("Nhập ID:");
-if(!id) return;
-
-let pin = prompt("Nhập mã bảo mật 4 số:");
-if(!pin) return;
+const id=prompt("Nhập ID:");
+const pin=prompt("Nhập mã PIN 4 số:");
 
 const { data } = await supabaseClient
-.from("employees")
+.from('employees')
 .select("*")
 .eq("emp_id",id)
 .eq("pin_code",pin)
 .single();
 
 if(!data){
-alert("Sai ID hoặc mã bảo mật");
+alert("Sai thông tin");
 return;
 }
 
-let newPass = prompt("Nhập mật khẩu mới:");
-if(!newPass) return;
-
+const newPass=prompt("Nhập mật khẩu mới:");
 await supabaseClient
-.from("employees")
+.from('employees')
 .update({ password_hash:newPass })
-.eq("emp_id", id);
+.eq("emp_id",id);
 
 alert("Đổi mật khẩu thành công");
 }
