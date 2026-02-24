@@ -164,6 +164,12 @@ font-size:14px;
 </div>
 
 <script>
+
+const supabaseUrl="https://apbaseiweunvfgeubvzp.supabase.co";
+const supabaseKey="sb_publishable_Dwob1zf-bHC2etDsbnJREw_sgaHuQDL";
+const { createClient } = supabase;
+const db=createClient(supabaseUrl,supabaseKey);
+
 /* ================= LANGUAGE ================= */
 
 const i18n={
@@ -174,16 +180,111 @@ id:{pageTitle:"SLIP GAJI",empInfoTitle:"INFORMASI KARYAWAN",lblEmpId:"ID KARYAWA
 };
 
 const salaryTranslate={
-vi:{"出勤工资":"Lương chuyên cần","满勤":"Thưởng chuyên cần","休假扣除":"Khấu trừ nghỉ phép","押金":"Tiền cọc","额外加扣":"Điều chỉnh thêm","补餐":"Phụ cấp ăn","绩效":"Thưởng hiệu suất"},
-zh:{"出勤工资":"出勤工资","满勤":"满勤","休假扣除":"休假扣除","押金":"押金","额外加扣":"额外加扣","补餐":"补餐","绩效":"绩效"},
-en:{"出勤工资":"Attendance Salary","满勤":"Attendance Bonus","休假扣除":"Leave Deduction","押金":"Security Deposit","额外加扣":"Extra Adjustment","补餐":"Meal Allowance","绩效":"Performance Bonus"},
-id:{"出勤工资":"Gaji Kehadiran","满勤":"Bonus Kehadiran","休假扣除":"Potongan Cuti","押金":"Deposit","额外加扣":"Penyesuaian","补餐":"Tunjangan Makan","绩效":"Bonus Kinerja"}
+vi:{
+"出勤工资":"Lương chuyên cần",
+"满勤":"Thưởng chuyên cần",
+"补餐":"Phụ cấp ăn",
+"绩效":"Thưởng hiệu suất",
+"休假扣除":"Khấu trừ nghỉ phép",
+"押金":"Tiền cọc",
+"额外加扣":"Điều chỉnh thêm"
+},
+zh:{
+"出勤工资":"出勤工资",
+"满勤":"满勤",
+"补餐":"补餐",
+"绩效":"绩效",
+"休假扣除":"休假扣除",
+"押金":"押金",
+"额外加扣":"额外加扣"
+},
+en:{
+"出勤工资":"Attendance Salary",
+"满勤":"Attendance Bonus",
+"补餐":"Meal Allowance",
+"绩效":"Performance Bonus",
+"休假扣除":"Leave Deduction",
+"押金":"Security Deposit",
+"额外加扣":"Extra Adjustment"
+},
+id:{
+"出勤工资":"Gaji Kehadiran",
+"满勤":"Bonus Kehadiran",
+"补餐":"Tunjangan Makan",
+"绩效":"Bonus Kinerja",
+"休假扣除":"Potongan Cuti",
+"押金":"Deposit",
+"额外加扣":"Penyesuaian"
+}
 };
 
-/* ================= RENDER TABLE ================= */
+let currentLang=localStorage.getItem("lang")||"vi";
+document.getElementById("langSelect").value=currentLang;
+
+function t(k){return i18n[currentLang][k]||k;}
+function ts(k){return salaryTranslate[currentLang][k]||k;}
+
+function applyLang(){
+for(let key in i18n[currentLang]){
+let el=document.getElementById(key);
+if(el) el.innerText=i18n[currentLang][key];
+}
+document.getElementById("btnBack").innerText=t("back");
+document.getElementById("btnSave").innerText=t("save");
+}
+
+document.getElementById("langSelect").onchange=function(){
+currentLang=this.value;
+localStorage.setItem("lang",currentLang);
+applyLang();
+render();
+};
+
+/* ================= DATA ================= */
+
+let salaryData=null,period=null,emp_id=null;
+
+async function load(){
+emp_id=localStorage.getItem("emp_id");
+period=new URLSearchParams(window.location.search).get("period");
+if(!emp_id||!period) return;
+
+document.getElementById("periodText").innerText=period;
+
+const {data}=await db.from("salaries")
+.select("data")
+.eq("emp_id",emp_id)
+.eq("period",period)
+.single();
+
+salaryData=data.data;
+applyLang();
+render();
+}
+
+function num(v){
+if(!v) return null;
+v=String(v).replace(/,/g,"");
+let n=Number(v);
+return isNaN(n)?null:n;
+}
+
+function parseBasic(v){
+if(!v) return "-";
+let m=String(v).match(/\d+/);
+return m?Number(m[0]).toLocaleString():"-";
+}
 
 function render(){
 if(!salaryData) return;
+
+document.getElementById("empId").innerText=emp_id;
+document.getElementById("fullName").innerText=salaryData["姓名"]||"-";
+document.getElementById("platform").innerText=salaryData["盘口"]||"-";
+document.getElementById("position").innerText=salaryData["岗位"]||"-";
+document.getElementById("accountType").innerText=salaryData["银行/GCASH"]||"-";
+document.getElementById("accountNumber").innerText=salaryData["卡号"]||"-";
+document.getElementById("basicSalary").innerText=parseBasic(salaryData["基础工资"]);
 
 let tbody=document.getElementById("tbody");
 tbody.innerHTML="";
@@ -198,13 +299,12 @@ tbody.innerHTML="";
 ].forEach(k=>{
 let n=num(salaryData[k]);
 if(n===null) return;
-
 let type=(k.includes("扣")||k.includes("押"))?"ded":"earn";
 
 tbody.innerHTML+=`
 <tr>
-<td>${salaryTranslate[currentLang][k]}</td>
-<td>${i18n[currentLang][type]}</td>
+<td>${ts(k)}</td>
+<td>${t(type)}</td>
 <td class="amount ${type}">${type==="ded"?"- ":"+ "}${n.toLocaleString()}</td>
 </tr>`;
 });
@@ -213,12 +313,32 @@ let extra=num(salaryData["额外加扣"]);
 if(extra!==null){
 tbody.innerHTML+=`
 <tr>
-<td>${salaryTranslate[currentLang]["额外加扣"]}</td>
-<td>${i18n[currentLang]["adj"]}</td>
+<td>${ts("额外加扣")}</td>
+<td>${t("adj")}</td>
 <td class="amount adj">${extra>=0?"+ ":""}${extra.toLocaleString()}</td>
 </tr>`;
 }
+
+document.getElementById("noteBox").innerHTML=
+salaryData["备注"]?`<b>${t("note")}:</b> ${salaryData["备注"]}`:"";
+
+let total=num(salaryData["1-15 工资"])||0;
+document.getElementById("totalAmount").innerText=total.toLocaleString();
 }
+
+function goBack(){window.location.href="dashboard.html";}
+
+function captureScreen(){
+html2canvas(document.getElementById("payslipCard")).then(canvas=>{
+let link=document.createElement("a");
+link.download=`Payslip_${emp_id}_${period}.png`;
+link.href=canvas.toDataURL("image/png");
+link.click();
+});
+}
+
+load();
+
 </script>
 
 </body>
