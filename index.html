@@ -18,7 +18,6 @@ background:radial-gradient(circle at 20% 20%, #1f2a48, #0f172a 60%);
 overflow:hidden;
 }
 
-/* ===== CARD ===== */
 .card{
 position:relative;
 z-index:10;
@@ -32,7 +31,6 @@ box-shadow:0 20px 60px rgba(0,0,0,0.6);
 color:white;
 }
 
-/* LANGUAGE SELECT */
 .lang-select{
 position:absolute;
 top:20px;
@@ -94,7 +92,6 @@ margin-top:20px;
 min-height:20px;
 }
 
-/* ===== LOADING SPINNER ===== */
 .spinner{
 border:3px solid rgba(255,255,255,0.3);
 border-top:3px solid white;
@@ -110,7 +107,6 @@ display:inline-block;
 100%{transform:rotate(360deg);}
 }
 
-/* ===== FORGOT PASSWORD ===== */
 .forgot{
 margin-top:15px;
 text-align:center;
@@ -119,7 +115,6 @@ cursor:pointer;
 color:#60a5fa;
 }
 
-/* ===== MODAL ===== */
 .modal-overlay{
 position:fixed;
 top:0;
@@ -203,7 +198,6 @@ flex:1;
 
 </div>
 
-<!-- PIN MODAL -->
 <div class="modal-overlay" id="pinModal">
 <div class="modal">
 <h3 id="pinTitle"></h3>
@@ -231,7 +225,7 @@ id:{title:"Sistem Gaji",id:"ID Karyawan",pass:"Kata Sandi",login:"Masuk",registe
 };
 
 let currentLang=localStorage.getItem("lang")||"vi";
-document.getElementById("langSelect").value=currentLang;
+langSelect.value=currentLang;
 
 function applyLang(){
 title.innerText=langData[currentLang].title;
@@ -290,6 +284,39 @@ mode="login";
 pinTitle.innerText=langData[currentLang].pinEnter;
 }
 
+openPinModal();
+}
+
+/* ===== ĐÂY LÀ PHẦN ĐƯỢC THÊM LẠI ===== */
+
+async function register(){
+const id=userId.value.trim();
+const pass=password.value.trim();
+const res=result;
+
+if(!id||!pass){
+res.innerHTML="❌ "+langData[currentLang].wrong;
+return;
+}
+
+const {data}=await supabaseClient
+.from("employees")
+.select("emp_id")
+.eq("emp_id",id)
+.single();
+
+if(data){
+res.innerHTML="❌ ID tồn tại";
+return;
+}
+
+await supabaseClient
+.from("employees")
+.insert([{emp_id:id,password_hash:pass}]);
+
+tempUser=id;
+mode="create";
+pinTitle.innerText=langData[currentLang].pinCreate;
 openPinModal();
 }
 
