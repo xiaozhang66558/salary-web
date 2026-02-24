@@ -3,6 +3,7 @@
 <head>
 <meta charset="UTF-8">
 <title>Payslip</title>
+<script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
 
 <style>
 body{
@@ -23,7 +24,6 @@ overflow:hidden;
 box-shadow:0 25px 60px rgba(0,0,0,0.3);
 }
 
-/* HEADER */
 .header{
 background:linear-gradient(90deg,#0f172a,#1e3a8a);
 color:white;
@@ -44,7 +44,6 @@ font-size:18px;
 opacity:0.9;
 }
 
-/* SECTION */
 .section{
 padding:30px;
 }
@@ -73,7 +72,6 @@ font-size:15px;
 font-weight:600;
 }
 
-/* TABLE */
 table{
 width:100%;
 border-collapse:collapse;
@@ -101,7 +99,6 @@ font-weight:600;
 .ded{color:#dc2626;}
 .adj{color:#2563eb;}
 
-/* TOTAL */
 .total-box{
 margin-top:25px;
 background:#0f172a;
@@ -126,6 +123,16 @@ font-size:12px;
 color:#64748b;
 padding:20px;
 border-top:1px solid #e5e7eb;
+}
+
+.back-btn{
+margin:20px;
+background:#1e293b;
+color:white;
+padding:10px 20px;
+border:none;
+border-radius:8px;
+cursor:pointer;
 }
 </style>
 </head>
@@ -155,7 +162,7 @@ border-top:1px solid #e5e7eb;
 
 <h3>Salary Breakdown</h3>
 
-<table id="salaryTable">
+<table>
 <thead>
 <tr>
 <th>Description</th>
@@ -163,7 +170,7 @@ border-top:1px solid #e5e7eb;
 <th class="amount">Amount</th>
 </tr>
 </thead>
-<tbody></tbody>
+<tbody id="salaryBody"></tbody>
 </table>
 
 <div class="total-box">
@@ -180,22 +187,49 @@ This is a computer-generated salary statement. No signature required.
 </div>
 
 <script>
-const salaryData = JSON.parse(localStorage.getItem("salaryData"));
-const period = localStorage.getItem("period");
-const empId = localStorage.getItem("emp_id");
 
-if(!salaryData){
-document.body.innerHTML="<h2 style='color:white'>No salary data found.</h2>";
-throw new Error("No salary");
+const supabaseUrl="https://apbaseiweunvfgeubvzp.supabase.co";
+const supabaseKey="sb_publishable_Dwob1zf-bHC2etDsbnJREw_sgaHuQDL";
+const { createClient } = supabase;
+const db=createClient(supabaseUrl,supabaseKey);
+
+async function loadSlip(){
+
+const emp_id=localStorage.getItem("emp_id");
+if(!emp_id){
+window.location.href="index.html";
+return;
 }
 
-document.getElementById("periodText").innerText = period;
-document.getElementById("empId").innerText = empId;
-document.getElementById("fullName").innerText = salaryData["姓名"] || "-";
+const urlParams=new URLSearchParams(window.location.search);
+const period=urlParams.get("period");
 
-const tbody = document.querySelector("#salaryTable tbody");
+if(!period){
+document.body.innerHTML="<h2 style='color:white'>No salary data found.</h2>";
+return;
+}
 
-let total = 0;
+document.getElementById("periodText").innerText=period;
+document.getElementById("empId").innerText=emp_id;
+
+const {data,error}=await db
+.from("salaries")
+.select("*")
+.eq("emp_id",emp_id)
+.eq("period",period)
+.single();
+
+if(error || !data){
+document.body.innerHTML="<h2 style='color:white'>No salary data found.</h2>";
+return;
+}
+
+const salaryData=data.data;
+
+document.getElementById("fullName").innerText=salaryData["姓名"] || "-";
+
+let total=0;
+let body=document.getElementById("salaryBody");
 
 function formatMoney(num){
 return Number(num).toLocaleString();
@@ -203,32 +237,37 @@ return Number(num).toLocaleString();
 
 for(let key in salaryData){
 
-let value = salaryData[key];
-if(!value || value==="NaN" || key==="ID") continue;
+let value=salaryData[key];
+if(!value || key==="ID") continue;
 
-let amount = Number(value);
+let amount=Number(value);
 if(isNaN(amount)) continue;
 
 let type="earn";
 if(key.includes("扣") || key.includes("押")) type="ded";
 if(key.includes("额外") || key.includes("调整")) type="adj";
 
-if(type==="earn") total += amount;
-if(type==="ded") total -= amount;
-if(type==="adj") total += amount;
+if(type==="earn") total+=amount;
+if(type==="ded") total-=amount;
+if(type==="adj") total+=amount;
 
-let row = `
+body.innerHTML+=`
 <tr>
 <td>${key}</td>
 <td>${type.toUpperCase()}</td>
-<td class="amount ${type}">${type==="ded"?"- ":"+ "}${formatMoney(amount)}</td>
+<td class="amount ${type}">
+${type==="ded"?"- ":"+ "}${formatMoney(amount)}
+</td>
 </tr>
 `;
-
-tbody.innerHTML += row;
 }
 
-document.getElementById("totalAmount").innerText = formatMoney(total);
+document.getElementById("totalAmount").innerText=formatMoney(total);
+
+}
+
+loadSlip();
+
 </script>
 
 </body>
