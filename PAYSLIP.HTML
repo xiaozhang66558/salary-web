@@ -164,64 +164,23 @@ font-size:14px;
 </div>
 
 <script>
+/* ================= LANGUAGE ================= */
 
 const i18n={
-vi:{earn:"THU",ded:"TRỪ",adj:"Đ/C",note:"Ghi chú"},
-zh:{earn:"收入",ded:"扣除",adj:"调整",note:"备注"},
-en:{earn:"EARN",ded:"DED",adj:"ADJ",note:"Note"},
-id:{earn:"MASUK",ded:"POTONG",adj:"ADJ",note:"Catatan"}
+vi:{pageTitle:"PHIẾU LƯƠNG",empInfoTitle:"THÔNG TIN NHÂN VIÊN",lblEmpId:"MÃ NHÂN VIÊN",lblFullName:"HỌ TÊN",lblPlatform:"NỀN TẢNG",lblPosition:"VỊ TRÍ",lblAccountType:"LOẠI TÀI KHOẢN",lblAccountNumber:"SỐ TÀI KHOẢN",lblBasicSalary:"LƯƠNG CƠ BẢN",breakdownTitle:"Chi tiết lương",thDesc:"Hạng mục",thType:"Loại",thAmount:"Số tiền",earn:"THU",ded:"TRỪ",adj:"Đ/C",totalTitle:"Thực nhận",footer:"Đây là phiếu lương tạo tự động.",back:"← Quay lại",save:"📸 Chụp màn hình",note:"Ghi chú"},
+zh:{pageTitle:"工资单",empInfoTitle:"员工信息",lblEmpId:"员工ID",lblFullName:"姓名",lblPlatform:"平台",lblPosition:"岗位",lblAccountType:"账户类型",lblAccountNumber:"账号",lblBasicSalary:"基础工资",breakdownTitle:"薪资明细",thDesc:"项目",thType:"类型",thAmount:"金额",earn:"收入",ded:"扣除",adj:"调整",totalTitle:"实发合计",footer:"此为系统生成薪资单。",back:"← 返回",save:"📸 保存截图",note:"备注"},
+en:{pageTitle:"PAYSLIP",empInfoTitle:"EMPLOYEE INFORMATION",lblEmpId:"EMPLOYEE ID",lblFullName:"FULL NAME",lblPlatform:"PLATFORM",lblPosition:"POSITION",lblAccountType:"ACCOUNT TYPE",lblAccountNumber:"ACCOUNT NUMBER",lblBasicSalary:"BASIC SALARY",breakdownTitle:"Salary Breakdown",thDesc:"Description",thType:"Type",thAmount:"Amount",earn:"EARN",ded:"DED",adj:"ADJ",totalTitle:"Total Take Home Pay",footer:"This is a computer-generated salary statement.",back:"← Back",save:"📸 Save Image",note:"Note"},
+id:{pageTitle:"SLIP GAJI",empInfoTitle:"INFORMASI KARYAWAN",lblEmpId:"ID KARYAWAN",lblFullName:"NAMA LENGKAP",lblPlatform:"PLATFORM",lblPosition:"POSISI",lblAccountType:"JENIS AKUN",lblAccountNumber:"NOMOR AKUN",lblBasicSalary:"GAJI POKOK",breakdownTitle:"Rincian Gaji",thDesc:"Keterangan",thType:"Tipe",thAmount:"Jumlah",earn:"MASUK",ded:"POTONG",adj:"ADJ",totalTitle:"Total Diterima",footer:"Slip gaji dibuat otomatis.",back:"← Kembali",save:"📸 Simpan Gambar",note:"Catatan"}
 };
 
 const salaryTranslate={
-vi:{
-"出勤工资":"Lương chuyên cần",
-"满勤":"Thưởng chuyên cần",
-"休假扣除":"Khấu trừ nghỉ phép",
-"押金":"Tiền cọc",
-"额外加扣":"Điều chỉnh thêm",
-"补餐":"Phụ cấp ăn",
-"绩效":"Thưởng hiệu suất"
-},
-zh:{
-"出勤工资":"出勤工资",
-"满勤":"满勤",
-"休假扣除":"休假扣除",
-"押金":"押金",
-"额外加扣":"额外加扣",
-"补餐":"补餐",
-"绩效":"绩效"
-},
-en:{
-"出勤工资":"Attendance Salary",
-"满勤":"Attendance Bonus",
-"休假扣除":"Leave Deduction",
-"押金":"Security Deposit",
-"额外加扣":"Extra Adjustment",
-"补餐":"Meal Allowance",
-"绩效":"Performance Bonus"
-},
-id:{
-"出勤工资":"Gaji Kehadiran",
-"满勤":"Bonus Kehadiran",
-"休假扣除":"Potongan Cuti",
-"押金":"Deposit",
-"额外加扣":"Penyesuaian",
-"补餐":"Tunjangan Makan",
-"绩效":"Bonus Kinerja"
-}
+vi:{"出勤工资":"Lương chuyên cần","满勤":"Thưởng chuyên cần","休假扣除":"Khấu trừ nghỉ phép","押金":"Tiền cọc","额外加扣":"Điều chỉnh thêm","补餐":"Phụ cấp ăn","绩效":"Thưởng hiệu suất"},
+zh:{"出勤工资":"出勤工资","满勤":"满勤","休假扣除":"休假扣除","押金":"押金","额外加扣":"额外加扣","补餐":"补餐","绩效":"绩效"},
+en:{"出勤工资":"Attendance Salary","满勤":"Attendance Bonus","休假扣除":"Leave Deduction","押金":"Security Deposit","额外加扣":"Extra Adjustment","补餐":"Meal Allowance","绩效":"Performance Bonus"},
+id:{"出勤工资":"Gaji Kehadiran","满勤":"Bonus Kehadiran","休假扣除":"Potongan Cuti","押金":"Deposit","额外加扣":"Penyesuaian","补餐":"Tunjangan Makan","绩效":"Bonus Kinerja"}
 };
 
-let currentLang=localStorage.getItem("lang")||"vi";
-
-function t(k){return i18n[currentLang][k]||k;}
-function ts(k){return salaryTranslate[currentLang][k]||k;}
-
-function num(v){
-if(!v) return null;
-v=String(v).replace(/,/g,"");
-let n=Number(v);
-return isNaN(n)?null:n;
-}
+/* ================= RENDER TABLE ================= */
 
 function render(){
 if(!salaryData) return;
@@ -244,8 +203,8 @@ let type=(k.includes("扣")||k.includes("押"))?"ded":"earn";
 
 tbody.innerHTML+=`
 <tr>
-<td>${ts(k)}</td>
-<td>${t(type)}</td>
+<td>${salaryTranslate[currentLang][k]}</td>
+<td>${i18n[currentLang][type]}</td>
 <td class="amount ${type}">${type==="ded"?"- ":"+ "}${n.toLocaleString()}</td>
 </tr>`;
 });
@@ -254,13 +213,12 @@ let extra=num(salaryData["额外加扣"]);
 if(extra!==null){
 tbody.innerHTML+=`
 <tr>
-<td>${ts("额外加扣")}</td>
-<td>${t("adj")}</td>
+<td>${salaryTranslate[currentLang]["额外加扣"]}</td>
+<td>${i18n[currentLang]["adj"]}</td>
 <td class="amount adj">${extra>=0?"+ ":""}${extra.toLocaleString()}</td>
 </tr>`;
 }
 }
-
 </script>
 
 </body>
