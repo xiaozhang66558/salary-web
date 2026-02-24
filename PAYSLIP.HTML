@@ -9,534 +9,700 @@
 
 <style>
 body{
-margin:0;
-font-family:"Segoe UI",Arial;
-background:#0f172a;
-display:flex;
-justify-content:center;
-padding:40px;
+  margin:0;
+  font-family:"Segoe UI", Arial;
+  background:#0f172a;
+  display:flex;
+  justify-content:center;
+  padding:40px;
 }
-
 .card{
-width:950px;
-background:white;
-border-radius:18px;
-overflow:hidden;
-box-shadow:0 30px 80px rgba(0,0,0,0.5);
+  width:980px;
+  background:white;
+  border-radius:18px;
+  overflow:hidden;
+  box-shadow:0 25px 60px rgba(0,0,0,0.35);
 }
-
 .header{
-background:linear-gradient(90deg,#0f172a,#1e3a8a);
-color:white;
-padding:35px;
-display:flex;
-justify-content:space-between;
-align-items:center;
+  background:linear-gradient(90deg,#0f172a,#1e3a8a);
+  color:white;
+  padding:26px 30px;
+  display:flex;
+  justify-content:space-between;
+  align-items:center;
 }
-
 .header h1{
-margin:0;
-letter-spacing:3px;
-font-size:30px;
+  margin:0;
+  letter-spacing:2px;
+  font-size:30px;
 }
-
+.header-right{
+  display:flex;
+  gap:14px;
+  align-items:center;
+}
 .period{
-font-size:18px;
-opacity:0.9;
+  font-size:16px;
+  opacity:0.95;
+  white-space:nowrap;
 }
-
+.lang-select select{
+  padding:8px 10px;
+  border-radius:8px;
+  border:none;
+  background:rgba(255,255,255,0.95);
+  color:#0f172a;
+  font-weight:600;
+  cursor:pointer;
+}
 .section{
-padding:35px;
+  padding:30px;
+  color:#0f172a;
 }
-
 .section-title{
-letter-spacing:2px;
-font-size:13px;
-color:#64748b;
-margin-bottom:15px;
+  margin:0 0 14px 0;
+  font-size:18px;
+  letter-spacing:2px;
+  color:#64748b;
+}
+.info-grid{
+  display:grid;
+  grid-template-columns:1fr 1fr;
+  border:1px solid #e5e7eb;
+  border-radius:12px;
+  overflow:hidden;
+  margin-bottom:26px;
+}
+.info-row{
+  display:grid;
+  grid-template-columns:1fr 1fr;
+}
+.info-cell{
+  padding:16px 18px;
+  border-right:1px solid #e5e7eb;
+  border-bottom:1px solid #e5e7eb;
+  background:#f8fafc;
+}
+.info-row .info-cell:last-child{ border-right:none; }
+.info-row:last-child .info-cell{ border-bottom:none; }
+
+.info-title{
+  font-size:11px;
+  color:#64748b;
+  letter-spacing:2px;
+  margin-bottom:6px;
+  text-transform:uppercase;
+}
+.info-value{
+  font-size:15px;
+  font-weight:700;
+  color:#0f172a;
+  word-break:break-word;
 }
 
-.info-table{
-width:100%;
-border-collapse:collapse;
-margin-bottom:30px;
-}
-
-.info-table td{
-border:1px solid #e5e7eb;
-padding:15px;
-background:#f8fafc;
-}
-
-.label{
-font-size:12px;
-color:#64748b;
-letter-spacing:1px;
-margin-bottom:5px;
-text-transform:uppercase;
-}
-
-.value{
-font-weight:600;
-font-size:15px;
+h3{
+  margin:0 0 12px 0;
+  font-size:20px;
+  color:#0f172a;
 }
 
 table{
-width:100%;
-border-collapse:collapse;
+  width:100%;
+  border-collapse:collapse;
+  margin-top:6px;
 }
-
 th{
-text-align:left;
-padding:14px;
-background:#e2e8f0;
-font-size:13px;
+  text-align:left;
+  padding:12px 14px;
+  background:#e2e8f0;
+  font-size:13px;
+  color:#0f172a;
 }
-
 td{
-padding:14px;
-border-bottom:1px solid #e5e7eb;
-font-size:14px;
+  padding:12px 14px;
+  border-bottom:1px solid #e5e7eb;
+  font-size:14px;
+  color:#0f172a;
 }
-
 .amount{
-text-align:right;
-font-weight:600;
+  text-align:right;
+  font-weight:700;
 }
-
 .earn{color:#16a34a;}
 .ded{color:#dc2626;}
 .adj{color:#2563eb;}
 
-.note-row{
-padding-top:20px;
-font-style:italic;
-color:#64748b;
+.note{
+  margin-top:12px;
+  padding-top:10px;
+  border-top:1px solid #e5e7eb;
+  color:#334155;
+  font-size:13px;
+  font-style:italic;
 }
 
 .total-box{
-margin-top:30px;
-background:#0f172a;
-color:white;
-padding:30px;
-border-radius:14px;
-display:flex;
-justify-content:space-between;
-align-items:center;
-font-size:20px;
+  margin-top:22px;
+  background:#0b1220;
+  color:white;
+  padding:24px 22px;
+  border-radius:14px;
+  display:flex;
+  justify-content:space-between;
+  align-items:center;
+}
+.total-title{
+  font-size:18px;
+  font-weight:700;
+}
+.total-amount{
+  font-size:30px;
+  font-weight:900;
+  color:#facc15;
 }
 
-.total-box span{
-font-size:30px;
-font-weight:bold;
-color:#facc15;
+.actions{
+  margin-top:18px;
+  display:flex;
+  gap:12px;
 }
-
-.btn-group{
-margin-top:30px;
-display:flex;
-gap:20px;
+.btn{
+  padding:12px 16px;
+  border:none;
+  border-radius:10px;
+  font-weight:700;
+  cursor:pointer;
+  font-size:14px;
 }
-
-button{
-padding:12px 20px;
-border:none;
-border-radius:8px;
-cursor:pointer;
-font-weight:bold;
+.btn-back{
+  background:#334155;
+  color:white;
 }
-
-.back-btn{
-background:#334155;
-color:white;
+.btn-pdf{
+  background:linear-gradient(45deg,#3b82f6,#06b6d4);
+  color:white;
 }
-
-.download-btn{
-background:linear-gradient(45deg,#3b82f6,#06b6d4);
-color:white;
-}
-
 .footer{
-text-align:center;
-font-size:12px;
-color:#64748b;
-padding:25px;
-border-top:1px solid #e5e7eb;
+  text-align:center;
+  font-size:12px;
+  color:#64748b;
+  padding:18px 20px;
+  border-top:1px solid #e5e7eb;
+}
+
+.error-wrap{
+  color:white;
+  font-size:18px;
+  width:980px;
+  text-align:center;
+}
+
+@media print{
+  body{ background:white; padding:0; }
+  .card{ box-shadow:none; border-radius:0; width:100%; }
+  .no-print{ display:none !important; }
 }
 </style>
 </head>
 
 <body>
 
+<div id="errorBox" class="error-wrap" style="display:none"></div>
+
 <div class="card" id="payslipCard">
 
-<div class="header">
-<h1 id="titleText">PAYSLIP</h1>
+  <div class="header">
+    <h1 id="pageTitle">PAYSLIP</h1>
 
-<div style="display:flex;align-items:center;gap:15px;">
-<select id="langSelect" onchange="changeLang()" style="padding:6px 10px;border-radius:6px;">
-<option value="cn">中文</option>
-<option value="vi">Tiếng Việt</option>
-<option value="en">English</option>
-<option value="id">Indonesia</option>
-</select>
+    <div class="header-right">
+      <div class="lang-select no-print">
+        <select id="langSelect">
+          <option value="vi">Tiếng Việt</option>
+          <option value="zh">中文</option>
+          <option value="en">English</option>
+          <option value="id">Bahasa</option>
+        </select>
+      </div>
+      <div class="period" id="periodText"></div>
+    </div>
+  </div>
 
-<div class="period" id="periodText"></div>
-</div>
-</div>
+  <div class="section">
+    <div class="section-title" id="empInfoTitle">EMPLOYEE INFORMATION</div>
 
-<div class="section">
+    <div class="info-grid" id="empInfoGrid">
+      <div class="info-row">
+        <div class="info-cell">
+          <div class="info-title" id="lblEmpId">EMPLOYEE ID</div>
+          <div class="info-value" id="empId"></div>
+        </div>
+        <div class="info-cell">
+          <div class="info-title" id="lblFullName">FULL NAME</div>
+          <div class="info-value" id="fullName"></div>
+        </div>
+      </div>
 
-<div class="section-title" id="empInfoTitle">EMPLOYEE INFORMATION</div>
+      <div class="info-row">
+        <div class="info-cell">
+          <div class="info-title" id="lblPlatform">PLATFORM</div>
+          <div class="info-value" id="platform"></div>
+        </div>
+        <div class="info-cell">
+          <div class="info-title" id="lblPosition">POSITION</div>
+          <div class="info-value" id="position"></div>
+        </div>
+      </div>
 
-<table class="info-table">
-<tr>
-<td>
-<div class="label" id="lblEmpId">EMPLOYEE ID</div>
-<div class="value" id="empId"></div>
-</td>
-<td>
-<div class="label" id="lblFullName">FULL NAME</div>
-<div class="value" id="fullName"></div>
-</td>
-</tr>
+      <div class="info-row">
+        <div class="info-cell">
+          <div class="info-title" id="lblAccountType">ACCOUNT TYPE</div>
+          <div class="info-value" id="accountType"></div>
+        </div>
+        <div class="info-cell">
+          <div class="info-title" id="lblAccountNumber">ACCOUNT NUMBER</div>
+          <div class="info-value" id="accountNumber"></div>
+        </div>
+      </div>
+    </div>
 
-<tr>
-<td>
-<div class="label" id="lblPlatform">PLATFORM</div>
-<div class="value" id="platform"></div>
-</td>
-<td>
-<div class="label" id="lblPosition">POSITION</div>
-<div class="value" id="position"></div>
-</td>
-</tr>
+    <h3 id="breakdownTitle">Salary Breakdown</h3>
 
-<tr>
-<td>
-<div class="label" id="lblAccountType">ACCOUNT TYPE</div>
-<div class="value" id="accountType"></div>
-</td>
-<td>
-<div class="label" id="lblAccountNumber">ACCOUNT NUMBER</div>
-<div class="value" id="accountNumber"></div>
-</td>
-</tr>
-</table>
+    <table id="salaryTable">
+      <thead>
+        <tr>
+          <th id="thDesc">Description</th>
+          <th id="thType">Type</th>
+          <th class="amount" id="thAmount">Amount</th>
+        </tr>
+      </thead>
+      <tbody></tbody>
+    </table>
 
-<h3 id="breakdownText">Salary Breakdown</h3>
+    <div class="note" id="noteBox" style="display:none"></div>
 
-<table>
-<thead>
-<tr>
-<th id="thDesc">Description</th>
-<th id="thType">Type</th>
-<th class="amount" id="thAmount">Amount</th>
-</tr>
-</thead>
-<tbody id="salaryBody"></tbody>
-</table>
+    <div class="total-box">
+      <div class="total-title" id="totalTitle">Total Take Home Pay</div>
+      <div class="total-amount" id="totalAmount">0</div>
+    </div>
 
-<div class="total-box">
-<div id="totalText">Total Take Home Pay</div>
-<span id="totalAmount">0</span>
-</div>
+    <div class="actions no-print">
+      <button class="btn btn-back" onclick="goBack()" id="btnBack">← Back</button>
+      <button class="btn btn-pdf" onclick="downloadPDF()" id="btnPDF">⬇ Download PDF</button>
+    </div>
+  </div>
 
-<div class="btn-group">
-<button class="back-btn" onclick="goBack()" id="btnBack">⬅ Back</button>
-<button class="download-btn" onclick="downloadPDF()" id="btnDownload">⬇ Download PDF</button>
-</div>
-
-</div>
-
-<div class="footer" id="footerText">
-This is a computer-generated salary statement.
-</div>
+  <div class="footer" id="footerText">
+    This is a computer-generated salary statement. No signature required.
+  </div>
 
 </div>
 
 <script>
-const supabaseUrl="https://apbaseiweunvfgeubvzp.supabase.co";
-const supabaseKey="sb_publishable_Dwob1zf-bHC2etDsbnJREw_sgaHuQDL";
+const supabaseUrl = "https://apbaseiweunvfgeubvzp.supabase.co";
+const supabaseKey = "sb_publishable_Dwob1zf-bHC2etDsbnJREw_sgaHuQDL";
 const { createClient } = supabase;
-const db=createClient(supabaseUrl,supabaseKey);
+const db = createClient(supabaseUrl, supabaseKey);
 
-let salaryDataGlobal=null;
-let currentLang=localStorage.getItem("lang")||"cn";
-
-/** UI translations */
-const UI = {
-cn:{
-payslip:"PAYSLIP",
-empInfo:"EMPLOYEE INFORMATION",
-breakdown:"Salary Breakdown",
-desc:"Description", type:"Type", amount:"Amount",
-total:"Total Take Home Pay",
-back:"⬅ 返回", download:"⬇ 下载 PDF",
-footer:"此为系统生成薪资单，无需签名。",
-lblEmpId:"员工ID", lblFullName:"姓名",
-lblPlatform:"盘口", lblPosition:"岗位",
-lblAccountType:"账户类型", lblAccountNumber:"卡号",
-note:"备注"
-},
-vi:{
-payslip:"PHIẾU LƯƠNG",
-empInfo:"THÔNG TIN NHÂN VIÊN",
-breakdown:"Chi tiết lương",
-desc:"Hạng mục", type:"Loại", amount:"Số tiền",
-total:"Thực nhận",
-back:"⬅ Quay lại", download:"⬇ Tải PDF",
-footer:"Đây là phiếu lương do hệ thống tạo, không cần chữ ký.",
-lblEmpId:"Mã nhân viên", lblFullName:"Họ tên",
-lblPlatform:"Nền tảng", lblPosition:"Vị trí",
-lblAccountType:"Loại tài khoản", lblAccountNumber:"Số tài khoản",
-note:"Ghi chú"
-},
-en:{
-payslip:"PAYSLIP",
-empInfo:"EMPLOYEE INFORMATION",
-breakdown:"Salary Breakdown",
-desc:"Item", type:"Type", amount:"Amount",
-total:"Total Take Home Pay",
-back:"⬅ Back", download:"⬇ Download PDF",
-footer:"This is a computer-generated salary statement. No signature required.",
-lblEmpId:"Employee ID", lblFullName:"Full Name",
-lblPlatform:"Platform", lblPosition:"Position",
-lblAccountType:"Account Type", lblAccountNumber:"Account Number",
-note:"Note"
-},
-id:{
-payslip:"SLIP GAJI",
-empInfo:"INFORMASI KARYAWAN",
-breakdown:"Rincian Gaji",
-desc:"Item", type:"Tipe", amount:"Jumlah",
-total:"Total Diterima",
-back:"⬅ Kembali", download:"⬇ Unduh PDF",
-footer:"Ini adalah slip gaji yang dibuat oleh sistem. Tidak perlu tanda tangan.",
-lblEmpId:"ID Karyawan", lblFullName:"Nama Lengkap",
-lblPlatform:"Platform", lblPosition:"Posisi",
-lblAccountType:"Tipe Akun", lblAccountNumber:"Nomor Akun",
-note:"Catatan"
-}
+/** ====== i18n ====== **/
+const i18n = {
+  vi: {
+    pageTitle: "PHIẾU LƯƠNG",
+    empInfoTitle: "THÔNG TIN NHÂN VIÊN",
+    lblEmpId: "MÃ NHÂN VIÊN",
+    lblFullName: "HỌ TÊN",
+    lblPlatform: "NỀN TẢNG",
+    lblPosition: "VỊ TRÍ",
+    lblAccountType: "LOẠI TÀI KHOẢN",
+    lblAccountNumber: "SỐ TÀI KHOẢN",
+    breakdownTitle: "Chi tiết lương",
+    thDesc: "Hạng mục",
+    thType: "Loại",
+    thAmount: "Số tiền",
+    earn: "THU",
+    ded: "TRỪ",
+    adj: "Đ/C",
+    totalTitle: "Thực nhận",
+    footer: "Đây là phiếu lương tạo tự động. Không cần chữ ký.",
+    back: "← Quay lại",
+    pdf: "⬇ Tải PDF",
+    notFound: "Không tìm thấy dữ liệu lương.",
+    note: "Ghi chú",
+    periodPrefix: ""
+  },
+  zh: {
+    pageTitle: "工资单",
+    empInfoTitle: "员工信息",
+    lblEmpId: "员工ID",
+    lblFullName: "姓名",
+    lblPlatform: "平台",
+    lblPosition: "岗位",
+    lblAccountType: "账户类型",
+    lblAccountNumber: "账号",
+    breakdownTitle: "薪资明细",
+    thDesc: "项目",
+    thType: "类型",
+    thAmount: "金额",
+    earn: "收入",
+    ded: "扣除",
+    adj: "调整",
+    totalTitle: "实发合计",
+    footer: "此为系统生成薪资单，无需签名。",
+    back: "← 返回",
+    pdf: "⬇ 下载PDF",
+    notFound: "未找到薪资数据。",
+    note: "备注",
+    periodPrefix: ""
+  },
+  en: {
+    pageTitle: "PAYSLIP",
+    empInfoTitle: "EMPLOYEE INFORMATION",
+    lblEmpId: "EMPLOYEE ID",
+    lblFullName: "FULL NAME",
+    lblPlatform: "PLATFORM",
+    lblPosition: "POSITION",
+    lblAccountType: "ACCOUNT TYPE",
+    lblAccountNumber: "ACCOUNT NUMBER",
+    breakdownTitle: "Salary Breakdown",
+    thDesc: "Description",
+    thType: "Type",
+    thAmount: "Amount",
+    earn: "EARN",
+    ded: "DED",
+    adj: "ADJ",
+    totalTitle: "Total Take Home Pay",
+    footer: "This is a computer-generated salary statement. No signature required.",
+    back: "← Back",
+    pdf: "⬇ Download PDF",
+    notFound: "No salary data found.",
+    note: "Note",
+    periodPrefix: ""
+  },
+  id: {
+    pageTitle: "SLIP GAJI",
+    empInfoTitle: "INFORMASI KARYAWAN",
+    lblEmpId: "ID KARYAWAN",
+    lblFullName: "NAMA LENGKAP",
+    lblPlatform: "PLATFORM",
+    lblPosition: "POSISI",
+    lblAccountType: "JENIS AKUN",
+    lblAccountNumber: "NOMOR AKUN",
+    breakdownTitle: "Rincian Gaji",
+    thDesc: "Keterangan",
+    thType: "Tipe",
+    thAmount: "Jumlah",
+    earn: "MASUK",
+    ded: "POTONG",
+    adj: "ADJ",
+    totalTitle: "Total Diterima",
+    footer: "Slip gaji dibuat otomatis. Tidak perlu tanda tangan.",
+    back: "← Kembali",
+    pdf: "⬇ Unduh PDF",
+    notFound: "Data gaji tidak ditemukan.",
+    note: "Catatan",
+    periodPrefix: ""
+  }
 };
 
-/** Salary column translations (Chinese key -> translated label) */
-const COL = {
-"盘口": {vi:"Nền tảng", en:"Platform", id:"Platform"},
-"岗位": {vi:"Vị trí", en:"Position", id:"Posisi"},
-"ID": {vi:"Mã nhân viên", en:"Employee ID", id:"ID Karyawan"},
-"姓名": {vi:"Họ tên", en:"Full Name", id:"Nama Lengkap"},
-"卡号": {vi:"Số tài khoản", en:"Account Number", id:"Nomor Akun"},
-"银行姓名": {vi:"Tên ngân hàng", en:"Bank Name", id:"Nama Bank"},
-"银行/GCASH": {vi:"Ngân hàng/GCASH", en:"Bank/GCASH", id:"Bank/GCASH"},
-"基础工资": {vi:"Lương cơ bản", en:"Basic Salary", id:"Gaji Pokok"},
-"出勤工资": {vi:"Lương chuyên cần", en:"Attendance Salary", id:"Gaji Kehadiran"},
-"休假扣除": {vi:"Khấu trừ nghỉ phép", en:"Leave Deduction", id:"Potongan Cuti"},
-"押金": {vi:"Tiền cọc", en:"Security Deposit", id:"Deposit"},
-"满勤": {vi:"Thưởng chuyên cần", en:"Full Attendance Bonus", id:"Bonus Kehadiran"},
-"额外加扣": {vi:"Điều chỉnh thêm", en:"Extra / Adjustment", id:"Tambahan / Penyesuaian"},
-"备注": {vi:"Ghi chú", en:"Note", id:"Catatan"},
-"1-15 工资": {vi:"Lương 1-15", en:"Salary (1-15)", id:"Gaji (1-15)"},
-"16-30 工资": {vi:"Lương 16-30", en:"Salary (16-30)", id:"Gaji (16-30)"}
+/** Dịch tên cột lương (từ key tiếng Trung trong Excel/jsonb) */
+const colMap = {
+  vi: {
+    "盘口":"Nền tảng", "岗位":"Vị trí", "ID":"Mã nhân viên", "姓名":"Họ tên",
+    "卡号":"Số tài khoản", "银行姓名":"Tên ngân hàng", "银行/GCASH":"Ngân hàng/GCASH",
+    "基础工资":"Lương cơ bản", "出勤工资":"Lương chuyên cần", "休假扣除":"Khấu trừ nghỉ phép",
+    "押金":"Tiền cọc", "满勤":"Thưởng chuyên cần", "额外加扣":"Điều chỉnh thêm", "备注":"Ghi chú",
+    "1-15 工资":"Lương 1-15", "16-30 工资":"Lương 16-30", "总计":"Thực nhận", "合计":"Thực nhận"
+  },
+  zh: {
+    "盘口":"盘口", "岗位":"岗位", "ID":"ID", "姓名":"姓名",
+    "卡号":"卡号", "银行姓名":"银行姓名", "银行/GCASH":"银行/GCASH",
+    "基础工资":"基础工资", "出勤工资":"出勤工资", "休假扣除":"休假扣除",
+    "押金":"押金", "满勤":"满勤", "额外加扣":"额外加扣", "备注":"备注",
+    "1-15 工资":"1-15 工资", "16-30 工资":"16-30 工资", "总计":"总计", "合计":"合计"
+  },
+  en: {
+    "盘口":"Platform", "岗位":"Position", "ID":"Employee ID", "姓名":"Full Name",
+    "卡号":"Account Number", "银行姓名":"Bank Name", "银行/GCASH":"Bank/GCASH",
+    "基础工资":"Basic Salary", "出勤工资":"Attendance Salary", "休假扣除":"Leave Deduction",
+    "押金":"Security Deposit", "满勤":"Attendance Bonus", "额外加扣":"Extra / Other", "备注":"Note",
+    "1-15 工资":"Salary 1-15", "16-30 工资":"Salary 16-30", "总计":"Total", "合计":"Total"
+  },
+  id: {
+    "盘口":"Platform", "岗位":"Posisi", "ID":"ID Karyawan", "姓名":"Nama Lengkap",
+    "卡号":"Nomor Akun", "银行姓名":"Nama Bank", "银行/GCASH":"Bank/GCASH",
+    "基础工资":"Gaji Pokok", "出勤工资":"Gaji Kehadiran", "休假扣除":"Potongan Cuti",
+    "押金":"Deposit", "满勤":"Bonus Kehadiran", "额外加扣":"Tambahan / Lainnya", "备注":"Catatan",
+    "1-15 工资":"Gaji 1-15", "16-30 工资":"Gaji 16-30", "总计":"Total", "合计":"Total"
+  }
 };
 
-function tCol(key){
-if(currentLang==="cn") return key;
-return (COL[key] && COL[key][currentLang]) ? COL[key][currentLang] : key;
+/** ====== helpers ====== **/
+function getLang(){
+  return localStorage.getItem("lang") || "vi";
 }
-
-function tType(type){
-if(currentLang==="cn") return type; // keep EARN/DED/ADJ if you want
-if(currentLang==="vi"){
-if(type==="EARN") return "THU";
-if(type==="DED") return "TRỪ";
-if(type==="ADJ") return "Đ/C";
+function setLang(lang){
+  localStorage.setItem("lang", lang);
+  applyLang(lang);
+  // rerender labels already drawn
+  renderLastData();
 }
-if(currentLang==="id"){
-if(type==="EARN") return "MASUK";
-if(type==="DED") return "POTONG";
-if(type==="ADJ") return "ADJ";
+function t(key){
+  const lang = getLang();
+  return (i18n[lang] && i18n[lang][key]) || (i18n.en[key] || key);
 }
-return type; // EN keep
+function labelCol(raw){
+  const lang = getLang();
+  return (colMap[lang] && colMap[lang][raw]) || raw;
 }
+function sanitizeNumber(v){
+  if(v === null || v === undefined) return null;
+  let s = String(v).trim();
+  if(!s) return null;
 
-function applyLang(){
-const L = UI[currentLang];
+  // xử lý NaN / null text
+  if(s.toLowerCase() === "nan" || s.toLowerCase() === "null" || s === "-") return null;
 
-document.getElementById("titleText").innerText = L.payslip;
-document.getElementById("empInfoTitle").innerText = L.empInfo;
-document.getElementById("breakdownText").innerText = L.breakdown;
+  // bỏ dấu phẩy + khoảng trắng
+  s = s.replace(/,/g, "").replace(/\s+/g, "");
 
-document.getElementById("thDesc").innerText = L.desc;
-document.getElementById("thType").innerText = L.type;
-document.getElementById("thAmount").innerText = L.amount;
-
-document.getElementById("totalText").innerText = L.total;
-document.getElementById("btnBack").innerText = L.back;
-document.getElementById("btnDownload").innerText = L.download;
-document.getElementById("footerText").innerText = L.footer;
-
-document.getElementById("lblEmpId").innerText = L.lblEmpId;
-document.getElementById("lblFullName").innerText = L.lblFullName;
-document.getElementById("lblPlatform").innerText = L.lblPlatform;
-document.getElementById("lblPosition").innerText = L.lblPosition;
-document.getElementById("lblAccountType").innerText = L.lblAccountType;
-document.getElementById("lblAccountNumber").innerText = L.lblAccountNumber;
-
-if(salaryDataGlobal) renderSalary(); // rerender to translate rows
+  // nếu có dấu +/-
+  // chỉ lấy số hợp lệ
+  const n = Number(s);
+  if(Number.isNaN(n)) return null;
+  return n;
 }
-
-function changeLang(){
-currentLang=document.getElementById("langSelect").value;
-localStorage.setItem("lang", currentLang);
-applyLang();
-}
-
-async function loadSlip(){
-const emp_id=localStorage.getItem("emp_id");
-if(!emp_id){window.location.href="index.html";return;}
-
-const urlParams=new URLSearchParams(window.location.search);
-const period=urlParams.get("period");
-document.getElementById("periodText").innerText=period;
-
-const {data, error}=await db
-.from("salaries")
-.select("*")
-.eq("emp_id",emp_id)
-.eq("period",period)
-.single();
-
-if(error || !data){
-document.body.innerHTML="<h2 style='color:white'>No salary data found.</h2>";
-return;
-}
-
-salaryDataGlobal=data.data || {};
-
-document.getElementById("empId").innerText=emp_id;
-document.getElementById("fullName").innerText=salaryDataGlobal["姓名"]||salaryDataGlobal["full_name"]||"-";
-document.getElementById("platform").innerText=salaryDataGlobal["盘口"]||"-";
-document.getElementById("position").innerText=salaryDataGlobal["岗位"]||"-";
-document.getElementById("accountType").innerText=salaryDataGlobal["银行/GCASH"]||"-";
-document.getElementById("accountNumber").innerText=salaryDataGlobal["卡号"]||"-";
-
-applyLang();
-}
-
-function parseNumber(val){
-if(val===null || val===undefined) return null;
-if(typeof val==="number") return isNaN(val) ? null : val;
-let s=String(val).trim();
-if(!s) return null;
-s=s.replace(/,/g,"");
-const n=Number(s);
-return isNaN(n) ? null : n;
-}
-
 function formatMoney(n){
-try{ return Number(n).toLocaleString(); }catch(e){ return String(n); }
+  try{
+    return Number(n).toLocaleString();
+  }catch(e){
+    return String(n);
+  }
+}
+function getQueryParam(name){
+  return new URLSearchParams(window.location.search).get(name);
+}
+function showError(msg){
+  document.getElementById("payslipCard").style.display = "none";
+  const e = document.getElementById("errorBox");
+  e.style.display = "block";
+  e.innerHTML = `
+    <div style="padding:30px;background:rgba(255,255,255,0.06);border-radius:14px;">
+      <h2 style="margin:0 0 12px 0;">${msg}</h2>
+      <button onclick="goBack()" style="margin-top:10px;padding:12px 16px;border:none;border-radius:10px;background:#334155;color:white;font-weight:700;cursor:pointer;">
+        ${t("back")}
+      </button>
+    </div>
+  `;
 }
 
-function detectTypeByKey(key){
-let type="EARN";
-if(key.includes("扣") || key.includes("押")) type="DED";
-if(key.includes("额外") || key.includes("调整")) type="ADJ";
-return type;
+/** ====== apply language to whole page ====== **/
+function applyLang(lang){
+  document.getElementById("pageTitle").innerText = i18n[lang].pageTitle;
+  document.getElementById("empInfoTitle").innerText = i18n[lang].empInfoTitle;
+
+  document.getElementById("lblEmpId").innerText = i18n[lang].lblEmpId;
+  document.getElementById("lblFullName").innerText = i18n[lang].lblFullName;
+  document.getElementById("lblPlatform").innerText = i18n[lang].lblPlatform;
+  document.getElementById("lblPosition").innerText = i18n[lang].lblPosition;
+  document.getElementById("lblAccountType").innerText = i18n[lang].lblAccountType;
+  document.getElementById("lblAccountNumber").innerText = i18n[lang].lblAccountNumber;
+
+  document.getElementById("breakdownTitle").innerText = i18n[lang].breakdownTitle;
+  document.getElementById("thDesc").innerText = i18n[lang].thDesc;
+  document.getElementById("thType").innerText = i18n[lang].thType;
+  document.getElementById("thAmount").innerText = i18n[lang].thAmount;
+
+  document.getElementById("totalTitle").innerText = i18n[lang].totalTitle;
+  document.getElementById("footerText").innerText = i18n[lang].footer;
+
+  document.getElementById("btnBack").innerText = i18n[lang].back;
+  document.getElementById("btnPDF").innerText = i18n[lang].pdf;
+
+  // set select UI
+  document.getElementById("langSelect").value = lang;
 }
 
-function renderSalary(){
-const body=document.getElementById("salaryBody");
-body.innerHTML="";
+/** ====== main load ====== **/
+let lastSalaryData = null;
+let lastPeriod = null;
+let lastEmpId = null;
 
-const keysOrder = [
-"基础工资","出勤工资","休假扣除","押金","满勤","额外加扣",
-"卡号","银行姓名","银行/GCASH",
-"盘口","岗位",
-"1-15 工资","16-30 工资"
-];
+async function loadPayslip(){
+  const lang = getLang();
+  applyLang(lang);
 
-const used=new Set();
-let total = 0;
+  const empId = localStorage.getItem("emp_id");
+  if(!empId){
+    window.location.href = "index.html";
+    return;
+  }
 
-/** Total priority: if P column/total stored in sheet, we use salary column first.
-    Your table uses “1-15 工资” (or maybe other period salary). We'll prioritize:
-    1) "1-15 工资" then 2) "16-30 工资" then 3) computed sum.
-**/
-const totalFromSalary =
-parseNumber(salaryDataGlobal["1-15 工资"]) ??
-parseNumber(salaryDataGlobal["16-30 工资"]);
+  const period = getQueryParam("period");
+  if(!period){
+    showError(t("notFound"));
+    return;
+  }
 
-function addRow(label, type, amount, css){
-body.innerHTML += `
-<tr>
-<td>${label}</td>
-<td>${tType(type)}</td>
-<td class="amount ${css}">${css==="ded" ? "- " : css==="earn" ? "+ " : ""}${formatMoney(amount)}</td>
-</tr>`;
+  document.getElementById("periodText").innerText = period;
+
+  // fetch from supabase salaries
+  const { data, error } = await db
+    .from("salaries")
+    .select("data, period")
+    .eq("emp_id", empId)
+    .eq("period", period)
+    .single();
+
+  if(error || !data || !data.data){
+    showError(t("notFound"));
+    return;
+  }
+
+  lastSalaryData = data.data;
+  lastPeriod = period;
+  lastEmpId = empId;
+
+  render(lastSalaryData, lastPeriod, lastEmpId);
 }
 
-/** Render ordered keys first (only numeric fields) */
-for(const k of keysOrder){
-if(!(k in salaryDataGlobal)) continue;
-used.add(k);
-
-const n=parseNumber(salaryDataGlobal[k]);
-if(n===null) continue;
-
-const t=detectTypeByKey(k);
-if(t==="EARN"){ total += n; addRow(tCol(k), "EARN", n, "earn"); }
-if(t==="DED"){ total -= n; addRow(tCol(k), "DED", n, "ded"); }
-if(t==="ADJ"){ total += n; addRow(tCol(k), "ADJ", n, "adj"); }
+function renderLastData(){
+  if(lastSalaryData && lastPeriod && lastEmpId){
+    render(lastSalaryData, lastPeriod, lastEmpId);
+  }
 }
 
-/** Render remaining numeric fields (exclude ID/姓名 etc) */
-for(const k in salaryDataGlobal){
-if(used.has(k)) continue;
-if(k==="ID" || k==="姓名" || k==="备注" || k==="盘口" || k==="岗位" || k==="卡号" || k==="银行姓名" || k==="银行/GCASH") continue;
+function render(salaryData, period, empId){
+  // ===== Employee info (lấy từ JSONB theo key excel) =====
+  // theo file của bạn: 盘口, 岗位, 姓名, 卡号, 银行/GCASH, 银行姓名
+  const fullName = salaryData["姓名"] || salaryData["name"] || "-";
+  const platform = salaryData["盘口"] || "-";
+  const position = salaryData["岗位"] || "-";
+  const accountType = salaryData["银行/GCASH"] || salaryData["银行"] || "-";
+  const accountNumber = salaryData["卡号"] || salaryData["账号"] || salaryData["账户"] || "-";
 
-const n=parseNumber(salaryDataGlobal[k]);
-if(n===null) continue;
+  document.getElementById("empId").innerText = empId;
+  document.getElementById("fullName").innerText = fullName;
+  document.getElementById("platform").innerText = platform;
+  document.getElementById("position").innerText = position;
+  document.getElementById("accountType").innerText = accountType;
+  document.getElementById("accountNumber").innerText = accountNumber;
 
-const t=detectTypeByKey(k);
-if(t==="EARN"){ total += n; addRow(tCol(k), "EARN", n, "earn"); }
-if(t==="DED"){ total -= n; addRow(tCol(k), "DED", n, "ded"); }
-if(t==="ADJ"){ total += n; addRow(tCol(k), "ADJ", n, "adj"); }
+  // ===== Salary Breakdown =====
+  // YÊU CẦU: "Chi tiết lương không cần có số tài khoản" => không đưa "卡号" vào bảng
+  // Hiển thị các cột lương bạn muốn thấy trong WPS:
+  const breakdownKeys = [
+    "基础工资",
+    "出勤工资",
+    "1-15 工资",
+    "16-30 工资",
+    "满勤",
+    "额外加扣",
+    "休假扣除",
+    "押金"
+  ];
+
+  const tbody = document.querySelector("#salaryTable tbody");
+  tbody.innerHTML = "";
+
+  let totalCalc = 0;
+  let hasAnyRow = false;
+
+  for(const key of breakdownKeys){
+    if(!(key in salaryData)) continue;
+
+    const raw = salaryData[key];
+    const n = sanitizeNumber(raw);
+
+    // nếu rỗng thì bỏ (tránh NaN)
+    if(n === null) continue;
+
+    // type logic
+    let type = "earn";
+    if(key.includes("扣") || key.includes("押")) type = "ded";
+    if(key.includes("额外") || key.includes("调整")) type = "adj";
+
+    // cộng tổng
+    if(type === "earn") totalCalc += n;
+    if(type === "ded") totalCalc -= n;
+    if(type === "adj") totalCalc += n;
+
+    const typeText = (type === "earn") ? t("earn") : (type === "ded") ? t("ded") : t("adj");
+
+    tbody.innerHTML += `
+      <tr>
+        <td>${labelCol(key)}</td>
+        <td style="font-weight:800;">${typeText}</td>
+        <td class="amount ${type}">${type==="ded" ? "- " : "+ "}${formatMoney(n)}</td>
+      </tr>
+    `;
+    hasAnyRow = true;
+  }
+
+  // Note (备注)
+  const noteRaw = salaryData["备注"];
+  const noteBox = document.getElementById("noteBox");
+  if(noteRaw && String(noteRaw).trim() && String(noteRaw).trim().toLowerCase() !== "nan"){
+    noteBox.style.display = "block";
+    noteBox.innerHTML = `<b>${t("note")}:</b> ${String(noteRaw).trim()}`;
+  }else{
+    noteBox.style.display = "none";
+    noteBox.innerHTML = "";
+  }
+
+  // Total: ưu tiên đọc nếu file có cột tổng (nếu bạn có “总计/合计/实发…”)
+  const totalCandidates = ["总计","合计","实发","实领","Total","total","THỰC NHẬN","Thực nhận"];
+  let totalFromData = null;
+  for(const k of totalCandidates){
+    if(k in salaryData){
+      const n = sanitizeNumber(salaryData[k]);
+      if(n !== null){
+        totalFromData = n;
+        break;
+      }
+    }
+  }
+
+  // Nếu không có cột tổng thì dùng totalCalc
+  const totalFinal = (totalFromData !== null) ? totalFromData : totalCalc;
+
+  document.getElementById("totalAmount").innerText = formatMoney(totalFinal);
+
+  // Nếu bảng trống hoàn toàn
+  if(!hasAnyRow){
+    // vẫn giữ layout corporate, nhưng báo không có dòng lương
+    tbody.innerHTML = `
+      <tr>
+        <td colspan="3" style="color:#64748b;font-style:italic;">${t("notFound")}</td>
+      </tr>
+    `;
+  }
 }
 
-/** Note row at bottom */
-const note = salaryDataGlobal["备注"];
-if(note){
-body.innerHTML += `
-<tr>
-<td colspan="3" class="note-row">
-${UI[currentLang].note}: ${note}
-</td>
-</tr>`;
-}
-
-/** final total */
-const finalTotal = (totalFromSalary!==null) ? totalFromSalary : total;
-document.getElementById("totalAmount").innerText = formatMoney(finalTotal);
-}
-
+/** ===== actions ===== **/
 function goBack(){
-window.location.href="dashboard.html";
+  window.location.href = "dashboard.html";
 }
 
 function downloadPDF(){
-const element=document.getElementById("payslipCard");
-html2pdf().set({
-margin:10,
-filename:'Payslip.pdf',
-html2canvas:{scale:2},
-jsPDF:{unit:'mm',format:'a4',orientation:'portrait'}
-}).from(element).save();
+  const element = document.getElementById("payslipCard");
+  const period = document.getElementById("periodText").innerText || "period";
+  const empId = (localStorage.getItem("emp_id") || "employee");
+  const filename = `Payslip_${empId}_${period}.pdf`.replace(/[\/\\:*?"<>|]/g, "-");
+
+  const opt = {
+    margin: [10, 10, 10, 10],
+    filename,
+    image: { type: "jpeg", quality: 0.98 },
+    html2canvas: { scale: 2, useCORS: true },
+    jsPDF: { unit: "mm", format: "a4", orientation: "portrait" }
+  };
+
+  html2pdf().set(opt).from(element).save();
 }
 
-/** init */
-document.getElementById("langSelect").value=currentLang;
-loadSlip();
+/** ===== init ===== **/
+document.getElementById("langSelect").addEventListener("change", (e)=> setLang(e.target.value));
+applyLang(getLang());
+loadPayslip();
 </script>
 
 </body>
