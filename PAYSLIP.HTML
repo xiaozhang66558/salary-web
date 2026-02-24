@@ -3,7 +3,9 @@
 <head>
 <meta charset="UTF-8">
 <title>Payslip</title>
+
 <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
+<script src="https://cdn.jsdelivr.net/npm/html2pdf.js@0.10.1/dist/html2pdf.bundle.min.js"></script>
 
 <style>
 body{
@@ -123,12 +125,36 @@ color:#64748b;
 padding:25px;
 border-top:1px solid #e5e7eb;
 }
+
+.btn-group{
+margin-top:30px;
+display:flex;
+gap:20px;
+}
+
+button{
+padding:12px 20px;
+border:none;
+border-radius:8px;
+cursor:pointer;
+font-weight:bold;
+}
+
+.back-btn{
+background:#334155;
+color:white;
+}
+
+.download-btn{
+background:linear-gradient(45deg,#3b82f6,#06b6d4);
+color:white;
+}
 </style>
 </head>
 
 <body>
 
-<div class="card">
+<div class="card" id="payslipCard">
 
 <div class="header">
 <h1 id="titleText">PAYSLIP</h1>
@@ -167,6 +193,11 @@ border-top:1px solid #e5e7eb;
 <span id="totalAmount">0</span>
 </div>
 
+<div class="btn-group">
+<button class="back-btn" onclick="goBack()">⬅ Back</button>
+<button class="download-btn" onclick="downloadPDF()">⬇ Download PDF</button>
+</div>
+
 </div>
 
 <div class="footer">
@@ -182,88 +213,15 @@ const supabaseKey="sb_publishable_Dwob1zf-bHC2etDsbnJREw_sgaHuQDL";
 const { createClient } = supabase;
 const db=createClient(supabaseUrl,supabaseKey);
 
-/* ===== LANGUAGE DICTIONARY ===== */
-
-const dictionary = {
-
-cn:{
-title:"工资单",
-breakdown:"工资明细",
-desc:"项目",
-type:"类型",
-amount:"金额",
-total:"实发工资",
-remark:"备注",
-fields:{
-"基础工资":"基础工资",
-"出勤工资":"出勤工资",
-"满勤":"满勤",
-"额外加扣":"额外加扣",
-"押金":"押金",
-"休假扣除":"休假扣除"
-}
-},
-
-vi:{
-title:"Phiếu Lương",
-breakdown:"Chi tiết lương",
-desc:"Hạng mục",
-type:"Loại",
-amount:"Số tiền",
-total:"Thực nhận",
-remark:"Ghi chú",
-fields:{
-"基础工资":"Lương cơ bản",
-"出勤工资":"Lương chuyên cần",
-"满勤":"Thưởng chuyên cần",
-"额外加扣":"Điều chỉnh thêm",
-"押金":"Tiền cọc",
-"休假扣除":"Khấu trừ nghỉ phép"
-}
-},
-
-en:{
-title:"Payslip",
-breakdown:"Salary Breakdown",
-desc:"Description",
-type:"Type",
-amount:"Amount",
-total:"Total Take Home Pay",
-remark:"Remark",
-fields:{
-"基础工资":"Basic Salary",
-"出勤工资":"Attendance Salary",
-"满勤":"Full Attendance Bonus",
-"额外加扣":"Adjustment",
-"押金":"Deposit",
-"休假扣除":"Leave Deduction"
-}
-},
-
-ph:{
-title:"Payslip",
-breakdown:"Breakdown ng Sahod",
-desc:"Paglalarawan",
-type:"Uri",
-amount:"Halaga",
-total:"Kabuuang Natanggap",
-remark:"Tala",
-fields:{
-"基础工资":"Batayang Sahod",
-"出勤工资":"Sahod sa Attendance",
-"满勤":"Bonus sa Attendance",
-"额外加扣":"Adjustment",
-"押金":"Deposit",
-"休假扣除":"Bawas sa Leave"
-}
-}
-
+const dictionary={
+cn:{title:"工资单",breakdown:"工资明细",desc:"项目",type:"类型",amount:"金额",total:"实发工资",remark:"备注"},
+vi:{title:"Phiếu Lương",breakdown:"Chi tiết lương",desc:"Hạng mục",type:"Loại",amount:"Số tiền",total:"Thực nhận",remark:"Ghi chú"},
+en:{title:"Payslip",breakdown:"Salary Breakdown",desc:"Description",type:"Type",amount:"Amount",total:"Total Take Home Pay",remark:"Remark"},
+ph:{title:"Payslip",breakdown:"Breakdown ng Sahod",desc:"Paglalarawan",type:"Uri",amount:"Halaga",total:"Kabuuang Natanggap",remark:"Tala"}
 };
 
-let currentLang = localStorage.getItem("lang") || "cn";
+let currentLang=localStorage.getItem("lang")||"cn";
 let salaryDataGlobal=null;
-
-/* ===== CHANGE LANGUAGE ===== */
 
 function changeLang(){
 currentLang=document.getElementById("langSelect").value;
@@ -272,31 +230,18 @@ applyLang();
 }
 
 function applyLang(){
-
 const lang=dictionary[currentLang];
-
 document.getElementById("titleText").innerText=lang.title;
 document.getElementById("breakdownText").innerText=lang.breakdown;
 document.getElementById("descText").innerText=lang.desc;
 document.getElementById("typeText").innerText=lang.type;
 document.getElementById("amountText").innerText=lang.amount;
 document.getElementById("totalText").innerText=lang.total;
-
-if(salaryDataGlobal){
-renderSalary();
 }
-
-}
-
-/* ===== LOAD DATA ===== */
 
 async function loadSlip(){
-
 const emp_id=localStorage.getItem("emp_id");
-if(!emp_id){
-window.location.href="index.html";
-return;
-}
+if(!emp_id){window.location.href="index.html";return;}
 
 const urlParams=new URLSearchParams(window.location.search);
 const period=urlParams.get("period");
@@ -314,46 +259,58 @@ renderSalary();
 applyLang();
 }
 
-/* ===== RENDER SALARY ===== */
-
 function renderSalary(){
-
-const lang=dictionary[currentLang];
 const body=document.getElementById("salaryBody");
 body.innerHTML="";
 
-let total=salaryDataGlobal["1-15 工资"] || 0;
+let total=salaryDataGlobal["1-15 工资"]||0;
 
 for(let key in salaryDataGlobal){
+let rawValue=salaryDataGlobal[key];
+if(rawValue===undefined||rawValue===null||rawValue===""||rawValue==="NaN") continue;
 
-if(!lang.fields[key]) continue;
+if(typeof rawValue==="number"||!isNaN(rawValue)){
+let amount=Number(rawValue);
+if(isNaN(amount)) continue;
 
-let value=salaryDataGlobal[key] || 0;
 let type="earn";
 if(key.includes("扣")||key.includes("押")) type="ded";
 if(key.includes("额外")) type="adj";
 
 body.innerHTML+=`
 <tr>
-<td>${lang.fields[key]}</td>
+<td>${key}</td>
 <td>${type.toUpperCase()}</td>
-<td class="amount ${type}">${Number(value).toLocaleString()}</td>
+<td class="amount ${type}">${amount.toLocaleString()}</td>
 </tr>`;
 }
+}
 
-/* REMARK */
 if(salaryDataGlobal["备注"]){
 body.innerHTML+=`
 <tr>
 <td colspan="3" style="padding-top:20px;font-style:italic;color:#64748b">
-${lang.remark}: ${salaryDataGlobal["备注"]}
+${dictionary[currentLang].remark}: ${salaryDataGlobal["备注"]}
 </td>
 </tr>`;
 }
 
 document.getElementById("totalAmount").innerText=
 Number(total).toLocaleString();
+}
 
+function goBack(){
+window.location.href="dashboard.html";
+}
+
+function downloadPDF(){
+const element=document.getElementById("payslipCard");
+html2pdf().set({
+margin:10,
+filename:'Payslip.pdf',
+html2canvas:{scale:2},
+jsPDF:{unit:'mm',format:'a4',orientation:'portrait'}
+}).from(element).save();
 }
 
 document.getElementById("langSelect").value=currentLang;
