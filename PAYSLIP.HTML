@@ -322,22 +322,10 @@ tbody.innerHTML+=`
 document.getElementById("noteBox").innerHTML =
 salaryData["备注"] ? `<b>${t("note")}:</b> ${salaryData["备注"]}` : "";
 
-let total = 0;
-
-// nếu có 工资
-if (salaryData["工资"]) {
-  total = num(salaryData["工资"]);
-}
-
-// nếu có 1-15 工资
-if (salaryData["1-15 工资"]) {
-  total += num(salaryData["1-15 工资"]);
-}
-
-// nếu có 16-31 工资
-if (salaryData["16-31 工资"]) {
-  total += num(salaryData["16-31 工资"]);
-}
+let total =
+(num(salaryData["工资"]) || 0) +
+(num(salaryData["1-15 工资"]) || 0) +
+(num(salaryData["16-31 工资"]) || 0);
 
 document.getElementById("totalAmount").innerText = total.toLocaleString();
 }
