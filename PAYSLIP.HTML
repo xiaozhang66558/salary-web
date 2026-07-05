@@ -109,27 +109,30 @@ td{padding:12px;border-bottom:1px solid #e5e7eb;}
 <script>
 
 /* ============ 工资公布设置 SALARY RELEASE ============ */
-/* 只隐藏"当前未发"的工资期。历史工资一直显示。       */
-/* 把要隐藏的期数名字放进 HIDE_PERIODS 里（要跟上传时 */
-/* 填的"期数/period"完全一样）。发工资后删掉即可。     */
-/* Only hide the CURRENT unpaid period(s). History     */
-/* always shows. Put the period name(s) you want hidden*/
-/* in HIDE_PERIODS — must EXACTLY match the period text */
-/* you typed when uploading. Remove after payday.       */
-const HIDE_PERIODS = [
-  "6月1-15",        /* PH 1-15 期 (不会误伤 6月16-30) */
-  "6月工资"          /* 外籍 6月工资 (现场/越南) */
-];
-const FORCE_MODE = "auto";  /* "auto" | "hide"=全部隐藏 | "show"=全部显示 */
-function isSalaryReleased(period){
+/* 外籍USDT工资(现场/越南/印尼/缅甸): 每月12号才显示。 */
+/* 12号之前隐藏(只核对地址)，12号起自动显示。          */
+/* 菲律宾PH工资: 一直显示(已发)。                       */
+/* Foreign USDT salary: shows from the 12th each month. */
+/* Before the 12th = hidden (address check only).       */
+/* PH salary: always visible.                           */
+const SHOW_DAY      = 12;          /* 外籍工资每月几号开始显示 */
+const HIDE_KEYWORDS = ["USDT","现场","越南","印尼","缅甸","印-越"];
+/* ↑ 用来认出"外籍USDT工资"的关键词(出现在期数或数据里) */
+const FORCE_MODE    = "auto";      /* "auto" | "hide" | "show" */
+
+function isForeignUSDT(period, data){
+  const hay = String(period||"") + " " + JSON.stringify(data||{});
+  /* 银行/GCASH = USDT 也算外籍 */
+  if(data && (data["银行/GCASH"]==="USDT" || data["银行姓名"]==="USDT")) return true;
+  for(const k of HIDE_KEYWORDS){ if(hay.indexOf(k)!==-1) return true; }
+  return false;
+}
+function isSalaryReleased(period, data){
   if(FORCE_MODE==="show") return true;
   if(FORCE_MODE==="hide") return false;
-  if(!period) return true;
-  /* 如果当前期数包含 HIDE_PERIODS 里任意一个关键词 → 隐藏 */
-  for(const p of HIDE_PERIODS){
-    if(p && String(period).indexOf(p)!==-1) return false;
-  }
-  return true;   /* 其他（历史）都显示 */
+  /* 只有外籍USDT工资才受12号限制；菲律宾一直显示 */
+  if(!isForeignUSDT(period, data)) return true;
+  return new Date().getDate() >= SHOW_DAY;   /* 12号起显示 */
 }
 /* ==================================================== */
 
@@ -195,7 +198,7 @@ document.getElementById("accountType").innerText=salaryData["银行/GCASH"]||"-"
 document.getElementById("accountNumber").innerText=salaryData["卡号"]||salaryData["卡号(USDT钱包)"]||"-";
 
 /* ===== 新工资隐藏，只显示地址；旧工资显示 ===== */
-const RELEASE_SALARY=isSalaryReleased(period);
+const RELEASE_SALARY=isSalaryReleased(period, salaryData);
 if(!RELEASE_SALARY){
   document.getElementById("tbody").innerHTML=`<tr><td colspan="3" style="text-align:center;padding:34px;color:#b45309;background:#fef3c7;font-weight:700;font-size:16px">${t("locked")}</td></tr>`;
   document.getElementById("totalAmount").innerText="***";
