@@ -109,16 +109,19 @@ td{padding:12px;border-bottom:1px solid #e5e7eb;}
 <script>
 
 /* ============ 工资公布设置 SALARY RELEASE ============ */
-/* 13号自动公布工资，之前只显示USDT地址              */
-/* auto-release on the 13th; before that only address */
-const RELEASE_DAY = 13;      /* 每月几号公布 auto-release day */
-const FORCE_MODE  = "auto";  /* "auto"=按日期 | "hide"=强制隐藏 | "show"=强制显示 */
-function isSalaryReleased(){
+/* 新上传的工资先隐藏 HIDE_DAYS 天（只核对地址），   */
+/* 之后自动显示。旧工资（历史）一直显示。            */
+/* Newly-uploaded salary hidden for HIDE_DAYS days    */
+/* (address check only); older salary always shows.   */
+const HIDE_DAYS  = 6;        /* 上传后隐藏几天 / days to hide after upload */
+const FORCE_MODE = "auto";   /* "auto" | "hide"=强制隐藏 | "show"=强制显示 */
+function isSalaryReleased(createdAt){
   if(FORCE_MODE==="show") return true;
   if(FORCE_MODE==="hide") return false;
-  return new Date().getDate() >= RELEASE_DAY;
+  if(!createdAt) return true;                 /* 没有日期就显示 */
+  const days=(Date.now()-new Date(createdAt).getTime())/(1000*60*60*24);
+  return days >= HIDE_DAYS;                    /* 超过HIDE_DAYS天就显示 */
 }
-const RELEASE_SALARY = isSalaryReleased();
 /* ==================================================== */
 
 const supabaseUrl="https://apbaseiweunvfgeubvzp.supabase.co";
@@ -155,15 +158,16 @@ document.getElementById("langSelect").onchange=function(){
 currentLang=this.value;localStorage.setItem("lang",currentLang);applyLang();render();
 };
 
-let salaryData=null,period=null,emp_id=null;
+let salaryData=null,period=null,emp_id=null,salaryCreatedAt=null;
 
 async function load(){
 emp_id=localStorage.getItem("emp_id");
 period=new URLSearchParams(window.location.search).get("period");
 if(!emp_id||!period) return;
 document.getElementById("periodText").innerText=period;
-const {data}=await db.from("salaries").select("data").eq("emp_id",emp_id).eq("period",period).single();
+const {data}=await db.from("salaries").select("data,created_at").eq("emp_id",emp_id).eq("period",period).single();
 salaryData=data.data;
+salaryCreatedAt=data.created_at;
 applyLang();
 render();
 }
@@ -181,7 +185,8 @@ document.getElementById("position").innerText=salaryData["岗位"]||"-";
 document.getElementById("accountType").innerText=salaryData["银行/GCASH"]||"-";
 document.getElementById("accountNumber").innerText=salaryData["卡号"]||salaryData["卡号(USDT钱包)"]||"-";
 
-/* ===== 未到公布日：隐藏工资，只显示地址 ===== */
+/* ===== 新工资隐藏，只显示地址；旧工资显示 ===== */
+const RELEASE_SALARY=isSalaryReleased(salaryCreatedAt);
 if(!RELEASE_SALARY){
   document.getElementById("tbody").innerHTML=`<tr><td colspan="3" style="text-align:center;padding:34px;color:#b45309;background:#fef3c7;font-weight:700;font-size:16px">${t("locked")}</td></tr>`;
   document.getElementById("totalAmount").innerText="***";
