@@ -109,18 +109,27 @@ td{padding:12px;border-bottom:1px solid #e5e7eb;}
 <script>
 
 /* ============ 工资公布设置 SALARY RELEASE ============ */
-/* 新上传的工资先隐藏 HIDE_DAYS 天（只核对地址），   */
-/* 之后自动显示。旧工资（历史）一直显示。            */
-/* Newly-uploaded salary hidden for HIDE_DAYS days    */
-/* (address check only); older salary always shows.   */
-const HIDE_DAYS  = 6;        /* 上传后隐藏几天 / days to hide after upload */
-const FORCE_MODE = "auto";   /* "auto" | "hide"=强制隐藏 | "show"=强制显示 */
-function isSalaryReleased(createdAt){
+/* 只隐藏"当前未发"的工资期。历史工资一直显示。       */
+/* 把要隐藏的期数名字放进 HIDE_PERIODS 里（要跟上传时 */
+/* 填的"期数/period"完全一样）。发工资后删掉即可。     */
+/* Only hide the CURRENT unpaid period(s). History     */
+/* always shows. Put the period name(s) you want hidden*/
+/* in HIDE_PERIODS — must EXACTLY match the period text */
+/* you typed when uploading. Remove after payday.       */
+const HIDE_PERIODS = [
+  "6月1-15",        /* PH 1-15 期 (不会误伤 6月16-30) */
+  "6月工资"          /* 外籍 6月工资 (现场/越南) */
+];
+const FORCE_MODE = "auto";  /* "auto" | "hide"=全部隐藏 | "show"=全部显示 */
+function isSalaryReleased(period){
   if(FORCE_MODE==="show") return true;
   if(FORCE_MODE==="hide") return false;
-  if(!createdAt) return true;                 /* 没有日期就显示 */
-  const days=(Date.now()-new Date(createdAt).getTime())/(1000*60*60*24);
-  return days >= HIDE_DAYS;                    /* 超过HIDE_DAYS天就显示 */
+  if(!period) return true;
+  /* 如果当前期数包含 HIDE_PERIODS 里任意一个关键词 → 隐藏 */
+  for(const p of HIDE_PERIODS){
+    if(p && String(period).indexOf(p)!==-1) return false;
+  }
+  return true;   /* 其他（历史）都显示 */
 }
 /* ==================================================== */
 
@@ -186,7 +195,7 @@ document.getElementById("accountType").innerText=salaryData["银行/GCASH"]||"-"
 document.getElementById("accountNumber").innerText=salaryData["卡号"]||salaryData["卡号(USDT钱包)"]||"-";
 
 /* ===== 新工资隐藏，只显示地址；旧工资显示 ===== */
-const RELEASE_SALARY=isSalaryReleased(salaryCreatedAt);
+const RELEASE_SALARY=isSalaryReleased(period);
 if(!RELEASE_SALARY){
   document.getElementById("tbody").innerHTML=`<tr><td colspan="3" style="text-align:center;padding:34px;color:#b45309;background:#fef3c7;font-weight:700;font-size:16px">${t("locked")}</td></tr>`;
   document.getElementById("totalAmount").innerText="***";
